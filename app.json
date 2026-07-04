@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "ChargeHub",
+    "slug": "chargehub-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "chargehub",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "predictiveBackGestureEnabled": false
+    }
+  }
+}

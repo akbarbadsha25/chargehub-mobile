@@ -5,11 +5,13 @@
 ChargeHub is a cross-platform EV charging discovery mobile application.
 
 Platform:
+
 - React Native
 - Expo
 - TypeScript
 
 Backend:
+
 - Supabase
 
 Goal:

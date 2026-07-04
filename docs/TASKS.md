@@ -2,12 +2,21 @@
 
 ## Setup
 
-- [ ] Expo Project
-- [ ] TypeScript
-- [ ] NativeWind
-- [ ] Zustand
-- [ ] TanStack Query
-- [ ] React Navigation
+- [x] Expo Project
+- [x] TypeScript
+- [x] ESLint
+- [x] Prettier
+- [x] Husky
+- [x] lint-staged
+- [x] NativeWind
+- [x] Zustand
+- [x] TanStack Query
+- [x] React Navigation
+- [x] Safe Area Context
+- [x] React Native Screens
+- [x] React Native Gesture Handler
+- [x] Supabase client configured
+- [x] Minimal app shell
 
 ---
 
@@ -37,6 +46,7 @@
 
 ## Maps
 
+- [x] Install react-native-maps
 - [ ] Google Maps
 - [ ] Current Location
 - [ ] Marker Rendering

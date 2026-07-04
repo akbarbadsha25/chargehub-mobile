@@ -21,6 +21,7 @@ Launch a working beta in one week that helps real EV users:
 EV owner who travels between cities, such as Kerala to Bangalore.
 
 Needs:
+
 - Reliable charger discovery
 - Confidence before reaching a station
 - Less app switching
@@ -30,6 +31,7 @@ Needs:
 EV owner who uses public chargers inside the city.
 
 Needs:
+
 - Nearby charger discovery
 - Basic filters
 - Quick navigation
