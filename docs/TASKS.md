@@ -48,7 +48,12 @@
 
 - [x] Install react-native-maps
 - [ ] Google Maps
-- [ ] Current Location
+- [x] Current Location
+- [x] Location permission request
+- [x] Location loading state
+- [x] Location denied state
+- [x] Location error state
+- [x] Retry Location action
 - [ ] Marker Rendering
 - [ ] Marker Clustering
 
