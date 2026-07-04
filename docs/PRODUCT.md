@@ -49,6 +49,36 @@ EV charging discovery is fragmented across Google Maps and multiple provider app
 - Charger details
 - Open in Google Maps / Apple Maps
 
+## Data Source Decision
+
+ChargeHub v0.1 will not call OpenChargeMap directly from the mobile app.
+
+The mobile app will read charger data from Supabase. OpenChargeMap will be used as the initial seed and periodic refresh data source for charger station data.
+
+Reasons:
+
+- Avoid exposing OpenChargeMap API keys in the mobile app.
+- Reduce dependency on OpenChargeMap runtime availability and rate limits.
+- Normalize inconsistent provider, connector, address, and power data before users see it.
+- Prepare for ChargeHub-owned verification, curation, and future provider integrations.
+
+## Charger Data Scope
+
+ChargeHub v0.1 will show charger discovery data from a normalized Supabase mirror.
+
+Supported charger fields:
+
+- Charger name
+- Provider/operator
+- Coordinates
+- Address
+- Connector types
+- Charging speed in kW when available
+- Operating status when available
+- Source attribution
+
+ChargeHub v0.1 will treat operating status as informational only. It will not guarantee real-time charger availability.
+
 ### Later
 
 - Login

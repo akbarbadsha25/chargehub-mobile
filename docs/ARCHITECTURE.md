@@ -41,9 +41,11 @@ The first version focuses only on charger discovery.
 
 - react-native-maps
 
-## External API
+## External Data Source
 
-- OpenChargeMap
+- OpenChargeMap for initial seed and periodic refresh
+
+The mobile app must not call OpenChargeMap directly in v0.1.
 
 ---
 
@@ -91,7 +93,7 @@ Current Location
 
 ↓
 
-OpenChargeMap API
+Supabase
 
 ↓
 
@@ -113,6 +115,24 @@ Charger Details
 
 Google Maps Navigation
 ```
+
+---
+
+# Data Source Strategy
+
+ChargeHub v0.1 uses Supabase as the normalized mirror/cache for charger station data.
+
+OpenChargeMap is the upstream source for initial charger data and future refresh jobs. OpenChargeMap data is imported into Supabase, normalized, and served to the mobile app from Supabase.
+
+The mobile app reads charger data only from Supabase.
+
+Reasons:
+
+- Avoid exposing OpenChargeMap API keys in the mobile app.
+- Avoid direct mobile dependency on OpenChargeMap rate limits and availability.
+- Normalize incomplete or inconsistent charger records before rendering.
+- Support ChargeHub-specific verification and future provider integrations.
+- Keep the mobile API surface stable if upstream data sources change.
 
 ---
 
@@ -140,7 +160,7 @@ Examples:
 
 - Chargers
 - Search results
-- API responses
+- Supabase query responses
 
 ---
 
@@ -150,13 +170,65 @@ Examples:
 
 - id
 - name
-- provider
-- address
+- operator_id
+- data_source_id
+- address_line_1
+- address_line_2
+- town
+- state_or_province
+- postcode
+- country
 - latitude
 - longitude
-- connector_type
-- power_kw
+- status
 - verified
+- source_station_id
+- last_source_update_at
+- created_at
+- updated_at
+
+---
+
+## station_connectors
+
+- id
+- station_id
+- connector_type
+- current_type
+- power_kw
+- amps
+- voltage
+- quantity
+- status
+- created_at
+- updated_at
+
+---
+
+## operators
+
+- id
+- name
+- website_url
+- phone
+- email
+- source_operator_id
+- created_at
+- updated_at
+
+---
+
+## data_sources
+
+- id
+- name
+- source_type
+- attribution
+- license
+- base_url
+- last_imported_at
+- created_at
+- updated_at
 
 ---
 
@@ -172,11 +244,15 @@ Examples:
 
 services/
 
-openChargeMap.ts
+supabase.ts
+
+chargers.ts
 
 maps.ts
 
 location.ts
+
+OpenChargeMap import/refresh logic must stay outside the mobile app runtime.
 
 Never call APIs directly from screens.
 
