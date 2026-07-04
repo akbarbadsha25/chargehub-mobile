@@ -54,6 +54,9 @@
 - [x] Location denied state
 - [x] Location error state
 - [x] Retry Location action
+- [x] LocationService
+- [x] useCurrentLocation hook
+- [x] Formatted location values
 - [ ] Marker Rendering
 - [ ] Marker Clustering
 

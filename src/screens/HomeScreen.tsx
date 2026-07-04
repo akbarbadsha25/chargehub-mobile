@@ -1,65 +1,24 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import * as Location from 'expo-location';
-import { Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
-type LocationStatus = Location.PermissionStatus | 'unknown';
+import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 
-type CurrentLocation = {
-  accuracy: number | null;
-  latitude: number;
-  longitude: number;
-};
+function formatCoordinate(value: number | undefined) {
+  return value === undefined ? 'Unavailable' : value.toFixed(6);
+}
+
+function formatAccuracy(value: number | null | undefined) {
+  return value == null ? 'Unavailable' : `${Math.round(value)} m`;
+}
 
 export function HomeScreen() {
-  const hasRequestedLocation = useRef(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [location, setLocation] = useState<CurrentLocation | null>(null);
-  const [permissionStatus, setPermissionStatus] =
-    useState<LocationStatus>('unknown');
-
-  const loadCurrentLocation = useCallback(async () => {
-    setErrorMessage(null);
-    setIsLoading(true);
-
-    try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      setPermissionStatus(permission.status);
-
-      if (permission.status !== Location.PermissionStatus.GRANTED) {
-        setLocation(null);
-        return;
-      }
-
-      const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
-      });
-
-      setLocation({
-        accuracy: currentLocation.coords.accuracy,
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude
-      });
-    } catch {
-      setLocation(null);
-      setErrorMessage('Unable to get your current location.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (hasRequestedLocation.current) {
-      return;
-    }
-
-    hasRequestedLocation.current = true;
-    void loadCurrentLocation();
-  }, [loadCurrentLocation]);
-
-  const showRetry =
-    permissionStatus === Location.PermissionStatus.DENIED ||
-    errorMessage !== null;
+  const {
+    errorMessage,
+    isLoading,
+    location,
+    permissionStatus,
+    retry,
+    showRetry
+  } = useCurrentLocation();
 
   return (
     <View className="flex-1 justify-center bg-white px-6">
@@ -71,17 +30,25 @@ export function HomeScreen() {
           Permission status: {permissionStatus}
         </Text>
         <Text className="text-base text-neutral-700">
-          Latitude: {location?.latitude ?? 'Unavailable'}
+          Latitude: {formatCoordinate(location?.latitude)}
         </Text>
         <Text className="text-base text-neutral-700">
-          Longitude: {location?.longitude ?? 'Unavailable'}
+          Longitude: {formatCoordinate(location?.longitude)}
         </Text>
         <Text className="text-base text-neutral-700">
-          Accuracy: {location?.accuracy ?? 'Unavailable'}
+          Accuracy: {formatAccuracy(location?.accuracy)}
         </Text>
         {isLoading ? (
-          <Text className="text-base text-neutral-700">
-            Loading location...
+          <View className="flex-row items-center gap-2">
+            <ActivityIndicator />
+            <Text className="text-base text-neutral-700">
+              Requesting location...
+            </Text>
+          </View>
+        ) : null}
+        {!isLoading && !location && !errorMessage ? (
+          <Text className="text-base text-neutral-600">
+            Location is not available yet.
           </Text>
         ) : null}
         {errorMessage ? (
@@ -91,7 +58,7 @@ export function HomeScreen() {
       {showRetry ? (
         <Pressable
           className="mt-6 items-center rounded-md bg-neutral-950 px-4 py-3"
-          onPress={loadCurrentLocation}
+          onPress={retry}
         >
           <Text className="font-semibold text-white">Retry Location</Text>
         </Pressable>
