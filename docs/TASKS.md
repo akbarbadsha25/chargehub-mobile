@@ -48,6 +48,10 @@
 
 - [x] Install react-native-maps
 - [ ] Google Maps
+- [x] Full-screen map
+- [x] Center map on current location
+- [x] User location dot
+- [x] My Location recenter button
 - [x] Current Location
 - [x] Location permission request
 - [x] Location loading state

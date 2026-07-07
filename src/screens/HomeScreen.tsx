@@ -1,16 +1,14 @@
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { useRef } from 'react';
+import { Text, View } from 'react-native';
 
+import { LoadingState } from '@/components/LoadingState';
+import { ChargeHubMapHandle, MapView } from '@/components/MapView';
+import { MyLocationButton } from '@/components/MyLocationButton';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
-
-function formatCoordinate(value: number | undefined) {
-  return value === undefined ? 'Unavailable' : value.toFixed(6);
-}
-
-function formatAccuracy(value: number | null | undefined) {
-  return value == null ? 'Unavailable' : `${Math.round(value)} m`;
-}
+import { locationPermissionStatus } from '@/services/location';
 
 export function HomeScreen() {
+  const mapRef = useRef<ChargeHubMapHandle>(null);
   const {
     errorMessage,
     isLoading,
@@ -20,49 +18,42 @@ export function HomeScreen() {
     showRetry
   } = useCurrentLocation();
 
+  const isPermissionDenied =
+    permissionStatus === locationPermissionStatus.DENIED;
+  const showError = isPermissionDenied || errorMessage !== null;
+
   return (
-    <View className="flex-1 justify-center bg-white px-6">
-      <Text className="text-center text-xl font-semibold text-neutral-950">
-        ChargeHub MVP
-      </Text>
-      <View className="mt-6 gap-3">
-        <Text className="text-base text-neutral-700">
-          Permission status: {permissionStatus}
-        </Text>
-        <Text className="text-base text-neutral-700">
-          Latitude: {formatCoordinate(location?.latitude)}
-        </Text>
-        <Text className="text-base text-neutral-700">
-          Longitude: {formatCoordinate(location?.longitude)}
-        </Text>
-        <Text className="text-base text-neutral-700">
-          Accuracy: {formatAccuracy(location?.accuracy)}
-        </Text>
-        {isLoading ? (
-          <View className="flex-row items-center gap-2">
-            <ActivityIndicator />
-            <Text className="text-base text-neutral-700">
-              Requesting location...
-            </Text>
-          </View>
-        ) : null}
-        {!isLoading && !location && !errorMessage ? (
-          <Text className="text-base text-neutral-600">
-            Location is not available yet.
+    <View className="flex-1 bg-white">
+      <MapView ref={mapRef} location={location} />
+      {isLoading ? <LoadingState message="Finding your location..." /> : null}
+      {showError ? (
+        <View className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-4 shadow">
+          <Text className="text-base font-semibold text-neutral-950">
+            Location needed
           </Text>
-        ) : null}
-        {errorMessage ? (
-          <Text className="text-base text-red-600">{errorMessage}</Text>
-        ) : null}
-      </View>
-      {showRetry ? (
-        <Pressable
-          className="mt-6 items-center rounded-md bg-neutral-950 px-4 py-3"
-          onPress={retry}
-        >
-          <Text className="font-semibold text-white">Retry Location</Text>
-        </Pressable>
+          <Text className="mt-1 text-sm text-neutral-600">
+            Allow location access so ChargeHub can center the map around you.
+          </Text>
+        </View>
       ) : null}
+      {showRetry ? (
+        <View className="absolute bottom-28 right-5">
+          <Text className="overflow-hidden rounded-md bg-white px-3 py-2 text-sm text-neutral-700 shadow">
+            Tap My Location to try again.
+          </Text>
+        </View>
+      ) : null}
+      <MyLocationButton
+        disabled={isLoading}
+        onPress={() => {
+          if (showRetry) {
+            void retry();
+            return;
+          }
+
+          mapRef.current?.recenter();
+        }}
+      />
     </View>
   );
 }
