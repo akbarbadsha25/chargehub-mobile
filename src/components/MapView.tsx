@@ -6,8 +6,9 @@ import {
   useRef
 } from 'react';
 import { StyleSheet } from 'react-native';
-import RNMapView, { Region } from 'react-native-maps';
+import RNMapView, { Marker, Region } from 'react-native-maps';
 
+import { Charger } from '@/services/chargers';
 import { CurrentLocation } from '@/services/location';
 
 const latitudeDelta = 0.045;
@@ -18,6 +19,7 @@ export type ChargeHubMapHandle = {
 };
 
 type ChargeHubMapProps = {
+  chargers: Charger[];
   location: CurrentLocation | null;
 };
 
@@ -31,7 +33,7 @@ function getRegion(location: CurrentLocation): Region {
 }
 
 export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
-  function MapView({ location }, ref) {
+  function MapView({ chargers, location }, ref) {
     const mapRef = useRef<RNMapView>(null);
 
     const recenter = useCallback(() => {
@@ -54,7 +56,19 @@ export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
         initialRegion={location ? getRegion(location) : undefined}
         showsUserLocation
         style={styles.map}
-      />
+      >
+        {chargers.map((charger) => (
+          <Marker
+            key={charger.id}
+            coordinate={{
+              latitude: charger.latitude,
+              longitude: charger.longitude
+            }}
+            description={charger.provider ?? undefined}
+            title={charger.name}
+          />
+        ))}
+      </RNMapView>
     );
   }
 );

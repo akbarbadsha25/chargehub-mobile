@@ -35,6 +35,11 @@
 
 ## Charger Data API
 
+- [x] OpenChargeMap direct API service for Sprint 4
+- [x] Normalize OpenChargeMap charger response
+- [x] Nearby charger loading state
+- [x] Nearby charger empty state
+- [x] Nearby charger error state
 - [ ] Supabase charger query service
 - [ ] Nearby charger query
 - [ ] Charger detail query
@@ -61,7 +66,8 @@
 - [x] LocationService
 - [x] useCurrentLocation hook
 - [x] Formatted location values
-- [ ] Marker Rendering
+- [x] Marker Rendering
+- [x] Marker callouts
 - [ ] Marker Clustering
 
 ---
