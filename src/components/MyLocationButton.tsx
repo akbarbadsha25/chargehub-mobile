@@ -11,13 +11,15 @@ export function MyLocationButton({
 }: MyLocationButtonProps) {
   return (
     <Pressable
-      className={`absolute bottom-8 right-5 rounded-full px-5 py-4 shadow ${
+      accessibilityLabel="Center map on my location"
+      accessibilityRole="button"
+      className={`absolute bottom-8 right-5 h-14 w-14 items-center justify-center rounded-full shadow ${
         disabled ? 'bg-neutral-300' : 'bg-neutral-950'
       }`}
       disabled={disabled}
       onPress={onPress}
     >
-      <Text className="font-semibold text-white">My Location</Text>
+      <Text className="text-2xl font-semibold text-white">⌖</Text>
     </Pressable>
   );
 }

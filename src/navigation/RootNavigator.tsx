@@ -16,7 +16,7 @@ export function RootNavigator() {
         <Stack.Screen
           component={HomeScreen}
           name="Home"
-          options={{ title: 'ChargeHub' }}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

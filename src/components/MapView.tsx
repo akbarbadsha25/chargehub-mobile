@@ -10,8 +10,8 @@ import RNMapView, { Region } from 'react-native-maps';
 
 import { CurrentLocation } from '@/services/location';
 
-const latitudeDelta = 0.012;
-const longitudeDelta = 0.012;
+const latitudeDelta = 0.045;
+const longitudeDelta = 0.045;
 
 export type ChargeHubMapHandle = {
   recenter: () => void;
