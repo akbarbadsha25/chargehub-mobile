@@ -11,7 +11,7 @@ export function LoadingState({ message }: LoadingStateProps) {
       pointerEvents="none"
     >
       <ActivityIndicator />
-      <Text className="mt-3 text-center text-base text-neutral-700">
+      <Text className="mt-4 text-center text-base font-medium text-neutral-700">
         {message}
       </Text>
     </View>

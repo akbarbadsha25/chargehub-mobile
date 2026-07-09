@@ -13,7 +13,7 @@ export function MyLocationButton({
     <Pressable
       accessibilityLabel="Center map on my location"
       accessibilityRole="button"
-      className={`absolute bottom-8 right-5 h-14 w-14 items-center justify-center rounded-full shadow ${
+      className={`absolute bottom-24 right-5 h-14 w-14 items-center justify-center rounded-full shadow ${
         disabled ? 'bg-neutral-300' : 'bg-neutral-950'
       }`}
       disabled={disabled}

@@ -30,15 +30,24 @@ function FavoriteCard({ charger, onPress }: FavoriteCardProps) {
 
   return (
     <Pressable
+      accessibilityLabel={`Open favorite charger ${charger.name}`}
       accessibilityRole="button"
-      className="mb-3 rounded-md border border-neutral-200 bg-white p-4 shadow-sm"
+      className="mb-4 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm"
       onPress={() => onPress(charger)}
     >
-      <Text className="text-base font-semibold text-neutral-950">
-        {charger.name}
-      </Text>
+      <View className="flex-row items-start justify-between">
+        <Text
+          className="mr-3 flex-1 text-base font-semibold leading-6 text-neutral-950"
+          numberOfLines={2}
+        >
+          {charger.name}
+        </Text>
+        <View className="h-8 w-8 items-center justify-center rounded-full bg-red-50">
+          <Text className="text-base font-semibold text-red-600">♥</Text>
+        </View>
+      </View>
       {details.length > 0 ? (
-        <Text className="mt-2 text-sm leading-5 text-neutral-600">
+        <Text className="mt-3 text-sm leading-5 text-neutral-600">
           {details.join(' • ')}
         </Text>
       ) : null}
@@ -60,7 +69,7 @@ export function FavoritesScreen({ navigation }: FavoritesScreenProps) {
   return (
     <View className="flex-1 bg-neutral-50" style={{ paddingTop: insets.top }}>
       <View className="border-b border-neutral-200 bg-white px-5 pb-4 pt-3">
-        <Text className="text-2xl font-semibold text-neutral-950">
+        <Text className="text-2xl font-semibold leading-8 text-neutral-950">
           Favorites
         </Text>
       </View>
@@ -76,8 +85,14 @@ export function FavoritesScreen({ navigation }: FavoritesScreenProps) {
 
       {!isLoading && favorites.length === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-center text-base text-neutral-600">
+          <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+            <Text className="text-3xl text-neutral-500">♡</Text>
+          </View>
+          <Text className="text-center text-lg font-semibold text-neutral-950">
             No favorite chargers yet.
+          </Text>
+          <Text className="mt-2 text-center text-sm leading-5 text-neutral-600">
+            Save chargers from the map to find them quickly during beta tests.
           </Text>
         </View>
       ) : null}
@@ -85,7 +100,7 @@ export function FavoritesScreen({ navigation }: FavoritesScreenProps) {
       {!isLoading && favorites.length > 0 ? (
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
+          contentContainerStyle={{ padding: 24, paddingBottom: 32 }}
         >
           {favorites.map((charger) => (
             <FavoriteCard

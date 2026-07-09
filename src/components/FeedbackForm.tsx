@@ -56,7 +56,7 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
   };
 
   return (
-    <View className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm">
+    <View className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
       <Text className="text-lg font-semibold text-neutral-950">Feedback</Text>
       <View className="mt-3 flex-row flex-wrap">
         {feedbackTypeOptions.map((option) => {
@@ -67,7 +67,7 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
               key={option.id}
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
-              className={`mb-2 mr-2 rounded-full border px-3 py-2 ${
+              className={`mb-2 mr-2 min-h-11 justify-center rounded-full border px-4 py-2 ${
                 isSelected
                   ? 'border-neutral-950 bg-neutral-950'
                   : 'border-neutral-200 bg-white'
@@ -88,7 +88,7 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
 
       <TextInput
         accessibilityLabel="Feedback message"
-        className="mt-2 min-h-28 rounded-md border border-neutral-200 px-3 py-3 text-base text-neutral-950"
+        className="mt-2 min-h-28 rounded-lg border border-neutral-200 px-3 py-3 text-base text-neutral-950"
         multiline
         onChangeText={setMessage}
         placeholder="What should we know?"
@@ -99,7 +99,7 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
       <TextInput
         accessibilityLabel="Optional contact"
         autoCapitalize="none"
-        className="mt-3 h-12 rounded-md border border-neutral-200 px-3 text-base text-neutral-950"
+        className="mt-4 h-12 rounded-lg border border-neutral-200 px-3 text-base text-neutral-950"
         keyboardType="email-address"
         onChangeText={setContact}
         placeholder="Contact (optional)"
@@ -114,7 +114,7 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
       ) : null}
       <Pressable
         accessibilityRole="button"
-        className={`mt-4 items-center rounded-md px-4 py-3 ${
+        className={`mt-4 h-12 items-center justify-center rounded-lg px-4 ${
           isSubmitting ? 'bg-neutral-400' : 'bg-neutral-950'
         }`}
         disabled={isSubmitting}

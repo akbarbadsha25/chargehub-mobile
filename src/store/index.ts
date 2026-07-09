@@ -12,12 +12,13 @@ type DiagnosticsState = {
   chargerCount: number | null;
   lastKnownLocation: CurrentLocation | null;
   permissionStatus: LocationPermissionStatus;
+  selectedFilters: ChargerFilter[];
   setHomeDiagnostics: (diagnostics: {
-    activeFilters: ChargerFilter[];
     chargerCount: number | null;
     lastKnownLocation: CurrentLocation | null;
     permissionStatus: LocationPermissionStatus;
   }) => void;
+  toggleFilter: (filter: ChargerFilter) => void;
 };
 
 export const useChargeHubDiagnosticsStore = create<DiagnosticsState>((set) => ({
@@ -25,5 +26,19 @@ export const useChargeHubDiagnosticsStore = create<DiagnosticsState>((set) => ({
   chargerCount: null,
   lastKnownLocation: null,
   permissionStatus: 'unknown',
-  setHomeDiagnostics: (diagnostics) => set(diagnostics)
+  selectedFilters: [],
+  setHomeDiagnostics: (diagnostics) => set(diagnostics),
+  toggleFilter: (filter) =>
+    set((state) => {
+      const selectedFilters = state.selectedFilters.includes(filter)
+        ? state.selectedFilters.filter(
+            (selectedFilter) => selectedFilter !== filter
+          )
+        : [...state.selectedFilters, filter];
+
+      return {
+        activeFilters: selectedFilters,
+        selectedFilters
+      };
+    })
 }));

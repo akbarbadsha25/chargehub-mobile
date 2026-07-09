@@ -1,7 +1,14 @@
 import { useFocusEffect } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { useCallback, useMemo, useState } from 'react';
-import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { feedbackTypeLabels, FeedbackForm } from '@/components/FeedbackForm';
@@ -19,7 +26,7 @@ type DiagnosticRowProps = {
 
 function DiagnosticRow({ label, value }: DiagnosticRowProps) {
   return (
-    <View className="border-t border-neutral-100 py-3">
+    <View className="border-t border-neutral-100 py-4">
       <Text className="text-xs font-semibold uppercase text-neutral-500">
         {label}
       </Text>
@@ -109,6 +116,20 @@ export function DiagnosticsScreen() {
       ? devicePermissionStatus
       : diagnostics.permissionStatus;
   const lastKnownLocation = diagnostics.lastKnownLocation ?? deviceLocation;
+  const handleClearFeedback = () => {
+    Alert.alert(
+      'Clear feedback?',
+      'This removes all locally submitted beta feedback from this device.',
+      [
+        { style: 'cancel', text: 'Cancel' },
+        {
+          onPress: () => void clearFeedback(),
+          style: 'destructive',
+          text: 'Clear'
+        }
+      ]
+    );
+  };
 
   return (
     <ScrollView
@@ -120,11 +141,17 @@ export function DiagnosticsScreen() {
       }}
       keyboardShouldPersistTaps="handled"
     >
-      <Text className="text-2xl font-semibold text-neutral-950">
+      <Text className="text-2xl font-semibold leading-8 text-neutral-950">
         Diagnostics
       </Text>
+      <Text className="mt-2 text-sm leading-5 text-neutral-600">
+        Quick beta context and locally stored feedback.
+      </Text>
 
-      <View className="mt-4 rounded-md border border-neutral-200 bg-white px-4 shadow-sm">
+      <View className="mt-6 rounded-lg border border-neutral-200 bg-white px-4 shadow-sm">
+        <Text className="py-4 text-lg font-semibold text-neutral-950">
+          App status
+        </Text>
         <DiagnosticRow label="App version" value={appVersion} />
         <DiagnosticRow label="Platform" value={Platform.OS} />
         <DiagnosticRow
@@ -146,20 +173,21 @@ export function DiagnosticsScreen() {
         <DiagnosticRow label="Active filters" value={activeFilterLabels} />
       </View>
 
-      <View className="mt-5">
+      <View className="mt-6">
         <FeedbackForm isSubmitting={isSubmitting} onSubmit={addFeedback} />
       </View>
 
-      <View className="mt-5 rounded-md border border-neutral-200 bg-white p-4 shadow-sm">
+      <View className="mt-6 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
         <View className="flex-row items-center justify-between">
-          <Text className="text-lg font-semibold text-neutral-950">
+          <Text className="mr-3 flex-1 text-lg font-semibold text-neutral-950">
             Submitted feedback
           </Text>
           {feedback.length > 0 ? (
             <Pressable
+              accessibilityLabel="Clear all submitted feedback"
               accessibilityRole="button"
-              className="rounded-full bg-neutral-100 px-3 py-2"
-              onPress={() => void clearFeedback()}
+              className="h-11 justify-center rounded-full bg-neutral-100 px-4"
+              onPress={handleClearFeedback}
             >
               <Text className="text-sm font-semibold text-neutral-800">
                 Clear
@@ -179,7 +207,7 @@ export function DiagnosticsScreen() {
         ) : null}
 
         {!isLoading && feedback.length === 0 ? (
-          <Text className="mt-3 text-sm text-neutral-600">
+          <Text className="mt-4 text-sm leading-5 text-neutral-600">
             No submitted feedback yet.
           </Text>
         ) : null}
@@ -188,7 +216,7 @@ export function DiagnosticsScreen() {
           ? feedback.map((item) => (
               <View
                 key={item.id}
-                className="mt-3 border-t border-neutral-100 pt-3"
+                className="mt-4 border-t border-neutral-100 pt-4"
               >
                 <Text className="text-sm font-semibold text-neutral-950">
                   {feedbackTypeLabels[item.type]}

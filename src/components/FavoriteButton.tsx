@@ -10,7 +10,7 @@ export function FavoriteButton({ isFavorite, onPress }: FavoriteButtonProps) {
     <Pressable
       accessibilityLabel={isFavorite ? 'Remove favorite' : 'Save favorite'}
       accessibilityRole="button"
-      className={`h-10 w-10 items-center justify-center rounded-full ${
+      className={`h-11 w-11 items-center justify-center rounded-full ${
         isFavorite ? 'bg-red-50' : 'bg-neutral-100'
       }`}
       hitSlop={8}

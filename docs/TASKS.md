@@ -100,6 +100,11 @@
 - [x] Local beta feedback form
 - [x] Submitted feedback persistence with AsyncStorage
 - [x] Diagnostics app and system info
+- [x] Beta UX polish pass
+- [x] Smooth marker and bottom sheet animations
+- [x] Shared filter state across tabs
+- [x] Polished favorites empty state
+- [x] Feedback clear confirmation
 
 ---
 

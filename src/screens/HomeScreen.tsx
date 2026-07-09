@@ -1,6 +1,6 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Text, View } from 'react-native';
 import { Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -35,7 +35,6 @@ export function HomeScreen({ route }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<ChargeHubMapHandle>(null);
   const [selectedCharger, setSelectedCharger] = useState<Charger | null>(null);
-  const [selectedFilters, setSelectedFilters] = useState<ChargerFilter[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [focusedFavoriteId, setFocusedFavoriteId] = useState<string | null>(
@@ -50,8 +49,14 @@ export function HomeScreen({ route }: HomeScreenProps) {
     showRetry
   } = useCurrentLocation();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const selectedFilters = useChargeHubDiagnosticsStore(
+    (state) => state.selectedFilters
+  );
   const setHomeDiagnostics = useChargeHubDiagnosticsStore(
     (state) => state.setHomeDiagnostics
+  );
+  const toggleFilter = useChargeHubDiagnosticsStore(
+    (state) => state.toggleFilter
   );
   const { handleRegionChangeComplete, queryCenter, visibleRegion } =
     useMapRegion(location);
@@ -84,7 +89,6 @@ export function HomeScreen({ route }: HomeScreenProps) {
 
   useEffect(() => {
     setHomeDiagnostics({
-      activeFilters: selectedFilters,
       chargerCount: chargers.length,
       lastKnownLocation: location,
       permissionStatus
@@ -136,7 +140,7 @@ export function HomeScreen({ route }: HomeScreenProps) {
       const coordinates = await geocodePlace(query);
 
       if (!coordinates) {
-        setSearchError('Place not found. Try a more specific search.');
+        setSearchError('No place found. Try a more specific search.');
         return;
       }
 
@@ -148,6 +152,7 @@ export function HomeScreen({ route }: HomeScreenProps) {
       }
 
       mapRef.current?.moveToCoordinates(coordinates, searchMapRegionDelta);
+      Keyboard.dismiss();
     } catch {
       setSearchError('Unable to search right now. Please try again.');
     } finally {
@@ -157,11 +162,7 @@ export function HomeScreen({ route }: HomeScreenProps) {
 
   const handleToggleFilter = (filter: ChargerFilter) => {
     setSelectedCharger(null);
-    setSelectedFilters((currentFilters) =>
-      currentFilters.includes(filter)
-        ? currentFilters.filter((currentFilter) => currentFilter !== filter)
-        : [...currentFilters, filter]
-    );
+    toggleFilter(filter);
   };
 
   return (
@@ -172,11 +173,12 @@ export function HomeScreen({ route }: HomeScreenProps) {
         location={location}
         onChargerPress={setSelectedCharger}
         onRegionChangeComplete={handleRegionChangeComplete}
+        selectedChargerId={selectedCharger?.id ?? null}
       />
       {isLoading ? <LoadingState message="Finding your location..." /> : null}
       {showError ? (
         <View
-          className="absolute inset-x-5 top-64 rounded-md bg-white px-4 py-4 shadow"
+          className="absolute inset-x-5 top-64 rounded-lg bg-white px-4 py-4 shadow"
           pointerEvents="none"
         >
           <Text className="text-base font-semibold text-neutral-950">
@@ -189,7 +191,7 @@ export function HomeScreen({ route }: HomeScreenProps) {
       ) : null}
       {isChargersPending ? (
         <View
-          className="absolute inset-x-5 top-64 rounded-md bg-white px-4 py-3 shadow"
+          className="absolute inset-x-5 top-64 rounded-lg bg-white px-4 py-3 shadow"
           pointerEvents="none"
         >
           <Text className="text-sm text-neutral-700">
@@ -207,17 +209,17 @@ export function HomeScreen({ route }: HomeScreenProps) {
       ) : null}
       {showChargersEmpty ? (
         <View
-          className="absolute inset-x-5 top-64 rounded-md bg-white px-4 py-3 shadow"
+          className="absolute inset-x-5 top-64 rounded-lg bg-white px-4 py-4 shadow"
           pointerEvents="none"
         >
-          <Text className="text-sm text-neutral-700">
+          <Text className="text-sm font-medium text-neutral-700">
             No nearby chargers found yet.
           </Text>
         </View>
       ) : null}
       {isChargersError ? (
         <View
-          className="absolute inset-x-5 top-64 rounded-md bg-white px-4 py-4 shadow"
+          className="absolute inset-x-5 top-64 rounded-lg bg-white px-4 py-4 shadow"
           pointerEvents="none"
         >
           <Text className="text-base font-semibold text-neutral-950">
@@ -232,7 +234,7 @@ export function HomeScreen({ route }: HomeScreenProps) {
       ) : null}
       {showRetry ? (
         <View className="absolute bottom-28 right-5" pointerEvents="none">
-          <Text className="overflow-hidden rounded-md bg-white px-3 py-2 text-sm text-neutral-700 shadow">
+          <Text className="overflow-hidden rounded-lg bg-white px-3 py-2 text-sm text-neutral-700 shadow">
             Tap My Location to try again.
           </Text>
         </View>
