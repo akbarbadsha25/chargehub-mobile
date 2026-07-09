@@ -69,9 +69,7 @@ export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
               latitude: charger.latitude,
               longitude: charger.longitude
             }}
-            description={charger.provider ?? undefined}
             onPress={() => onChargerPress(charger)}
-            title={charger.name}
           />
         ))}
       </RNMapView>

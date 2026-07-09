@@ -8,17 +8,25 @@ type ChargerBottomSheetProps = {
 };
 
 type DetailRowProps = {
+  icon: string;
   label: string;
   value: string;
 };
 
-function DetailRow({ label, value }: DetailRowProps) {
+function DetailRow({ icon, label, value }: DetailRowProps) {
   return (
-    <View className="mt-3">
-      <Text className="text-xs font-semibold uppercase text-neutral-500">
-        {label}
-      </Text>
-      <Text className="mt-1 text-sm text-neutral-800">{value}</Text>
+    <View className="flex-row items-center border-t border-neutral-100 py-3">
+      <View className="h-10 w-10 items-center justify-center rounded-full bg-neutral-100">
+        <Text className="text-xs font-bold text-neutral-700">{icon}</Text>
+      </View>
+      <View className="ml-3 flex-1">
+        <Text className="text-xs font-semibold uppercase text-neutral-500">
+          {label}
+        </Text>
+        <Text className="mt-0.5 text-sm leading-5 text-neutral-900">
+          {value}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -51,25 +59,32 @@ export function ChargerBottomSheet({
         </Pressable>
       </View>
 
-      {charger.address ? (
-        <DetailRow label="Address" value={charger.address} />
-      ) : null}
-      {charger.distanceKm !== null ? (
-        <DetailRow
-          label="Distance"
-          value={`${charger.distanceKm.toFixed(1)} km`}
-        />
-      ) : null}
-      {charger.connectorType ? (
-        <DetailRow label="Connector" value={charger.connectorType} />
-      ) : null}
-      {charger.powerKw !== null ? (
-        <DetailRow label="Power" value={`${charger.powerKw} kW`} />
-      ) : null}
+      <View className="mt-4">
+        {charger.address ? (
+          <DetailRow icon="PIN" label="Address" value={charger.address} />
+        ) : null}
+        {charger.distanceKm !== null ? (
+          <DetailRow
+            icon="KM"
+            label="Distance"
+            value={`${charger.distanceKm.toFixed(1)} km`}
+          />
+        ) : null}
+        {charger.connectorType ? (
+          <DetailRow
+            icon="TYPE"
+            label="Connector"
+            value={charger.connectorType}
+          />
+        ) : null}
+        {charger.powerKw !== null ? (
+          <DetailRow icon="KW" label="Power" value={`${charger.powerKw} kW`} />
+        ) : null}
+      </View>
 
       <Pressable
         accessibilityRole="button"
-        className="mt-5 items-center rounded-md bg-neutral-200 px-4 py-3"
+        className="mt-2 items-center rounded-md bg-neutral-200 px-4 py-3"
         disabled
       >
         <Text className="font-semibold text-neutral-500">Navigate</Text>
