@@ -54,8 +54,12 @@ export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
       <RNMapView
         ref={mapRef}
         initialRegion={location ? getRegion(location) : undefined}
+        pitchEnabled
+        rotateEnabled
+        scrollEnabled
         showsUserLocation
         style={styles.map}
+        zoomEnabled
       >
         {chargers.map((charger) => (
           <Marker

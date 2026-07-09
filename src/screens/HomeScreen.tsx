@@ -39,7 +39,10 @@ export function HomeScreen() {
       <MapView ref={mapRef} chargers={chargers} location={location} />
       {isLoading ? <LoadingState message="Finding your location..." /> : null}
       {showError ? (
-        <View className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-4 shadow">
+        <View
+          className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-4 shadow"
+          pointerEvents="none"
+        >
           <Text className="text-base font-semibold text-neutral-950">
             Location needed
           </Text>
@@ -49,21 +52,30 @@ export function HomeScreen() {
         </View>
       ) : null}
       {isChargersLoading ? (
-        <View className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-3 shadow">
+        <View
+          className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-3 shadow"
+          pointerEvents="none"
+        >
           <Text className="text-sm text-neutral-700">
             Loading nearby chargers...
           </Text>
         </View>
       ) : null}
       {showChargersEmpty ? (
-        <View className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-3 shadow">
+        <View
+          className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-3 shadow"
+          pointerEvents="none"
+        >
           <Text className="text-sm text-neutral-700">
             No nearby chargers found yet.
           </Text>
         </View>
       ) : null}
       {isChargersError ? (
-        <View className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-4 shadow">
+        <View
+          className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-4 shadow"
+          pointerEvents="none"
+        >
           <Text className="text-base font-semibold text-neutral-950">
             Chargers unavailable
           </Text>
@@ -75,7 +87,7 @@ export function HomeScreen() {
         </View>
       ) : null}
       {showRetry ? (
-        <View className="absolute bottom-28 right-5">
+        <View className="absolute bottom-28 right-5" pointerEvents="none">
           <Text className="overflow-hidden rounded-md bg-white px-3 py-2 text-sm text-neutral-700 shadow">
             Tap My Location to try again.
           </Text>

@@ -6,7 +6,10 @@ type LoadingStateProps = {
 
 export function LoadingState({ message }: LoadingStateProps) {
   return (
-    <View className="absolute inset-0 items-center justify-center bg-white/90 px-6">
+    <View
+      className="absolute inset-0 items-center justify-center bg-white/90 px-6"
+      pointerEvents="none"
+    >
       <ActivityIndicator />
       <Text className="mt-3 text-center text-base text-neutral-700">
         {message}
