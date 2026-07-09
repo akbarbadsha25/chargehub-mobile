@@ -78,7 +78,10 @@
 
 ## Features
 
-- [ ] Search
+- [x] Place search
+- [x] Native place geocoding
+- [x] Search map movement
+- [x] Search loading and error states
 - [ ] Filters
 - [x] Charger Details
 - [x] Charger details bottom sheet

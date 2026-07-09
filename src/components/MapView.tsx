@@ -10,9 +10,10 @@ import RNMapView, { Marker, Region } from 'react-native-maps';
 
 import { defaultMapRegionDelta } from '@/hooks/useMapRegion';
 import { Charger } from '@/services/chargers';
-import { CurrentLocation } from '@/services/location';
+import { Coordinates, CurrentLocation } from '@/services/location';
 
 export type ChargeHubMapHandle = {
+  moveToCoordinates: (coordinates: Coordinates) => void;
   recenter: () => void;
 };
 
@@ -23,11 +24,11 @@ type ChargeHubMapProps = {
   onRegionChangeComplete: (region: Region) => void;
 };
 
-function getRegion(location: CurrentLocation): Region {
+function getRegion(coordinates: Coordinates): Region {
   return {
-    latitude: location.latitude,
+    latitude: coordinates.latitude,
     latitudeDelta: defaultMapRegionDelta,
-    longitude: location.longitude,
+    longitude: coordinates.longitude,
     longitudeDelta: defaultMapRegionDelta
   };
 }
@@ -39,15 +40,22 @@ export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
   ) {
     const mapRef = useRef<RNMapView>(null);
 
+    const moveToCoordinates = useCallback((coordinates: Coordinates) => {
+      mapRef.current?.animateToRegion(getRegion(coordinates), 500);
+    }, []);
+
     const recenter = useCallback(() => {
       if (!location) {
         return;
       }
 
-      mapRef.current?.animateToRegion(getRegion(location), 500);
-    }, [location]);
+      moveToCoordinates(location);
+    }, [location, moveToCoordinates]);
 
-    useImperativeHandle(ref, () => ({ recenter }), [recenter]);
+    useImperativeHandle(ref, () => ({ moveToCoordinates, recenter }), [
+      moveToCoordinates,
+      recenter
+    ]);
 
     useEffect(() => {
       recenter();

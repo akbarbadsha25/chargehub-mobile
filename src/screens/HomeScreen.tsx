@@ -5,15 +5,19 @@ import { ChargerBottomSheet } from '@/components/ChargerBottomSheet';
 import { LoadingState } from '@/components/LoadingState';
 import { ChargeHubMapHandle, MapView } from '@/components/MapView';
 import { MyLocationButton } from '@/components/MyLocationButton';
+import { SearchBar } from '@/components/SearchBar';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { useMapRegion } from '@/hooks/useMapRegion';
 import { useNearbyChargers } from '@/hooks/useNearbyChargers';
 import { Charger } from '@/services/chargers';
+import { geocodePlace } from '@/services/geocoding';
 import { locationPermissionStatus } from '@/services/location';
 
 export function HomeScreen() {
   const mapRef = useRef<ChargeHubMapHandle>(null);
   const [selectedCharger, setSelectedCharger] = useState<Charger | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const {
     errorMessage,
     isLoading,
@@ -59,6 +63,27 @@ export function HomeScreen() {
     }
   }, [selectedCharger, visibleRegion]);
 
+  const handleSearch = async (query: string) => {
+    setSelectedCharger(null);
+    setSearchError(null);
+    setIsSearching(true);
+
+    try {
+      const coordinates = await geocodePlace(query);
+
+      if (!coordinates) {
+        setSearchError('Place not found. Try a more specific search.');
+        return;
+      }
+
+      mapRef.current?.moveToCoordinates(coordinates);
+    } catch {
+      setSearchError('Unable to search right now. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <View className="flex-1 bg-white">
       <MapView
@@ -71,7 +96,7 @@ export function HomeScreen() {
       {isLoading ? <LoadingState message="Finding your location..." /> : null}
       {showError ? (
         <View
-          className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-4 shadow"
+          className="absolute inset-x-5 top-48 rounded-md bg-white px-4 py-4 shadow"
           pointerEvents="none"
         >
           <Text className="text-base font-semibold text-neutral-950">
@@ -84,7 +109,7 @@ export function HomeScreen() {
       ) : null}
       {isChargersPending ? (
         <View
-          className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-3 shadow"
+          className="absolute inset-x-5 top-48 rounded-md bg-white px-4 py-3 shadow"
           pointerEvents="none"
         >
           <Text className="text-sm text-neutral-700">
@@ -94,7 +119,7 @@ export function HomeScreen() {
       ) : null}
       {isRefreshingChargers ? (
         <View
-          className="absolute right-5 top-16 h-10 w-10 items-center justify-center rounded-full bg-white shadow"
+          className="absolute right-5 top-48 h-10 w-10 items-center justify-center rounded-full bg-white shadow"
           pointerEvents="none"
         >
           <ActivityIndicator size="small" />
@@ -102,7 +127,7 @@ export function HomeScreen() {
       ) : null}
       {showChargersEmpty ? (
         <View
-          className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-3 shadow"
+          className="absolute inset-x-5 top-48 rounded-md bg-white px-4 py-3 shadow"
           pointerEvents="none"
         >
           <Text className="text-sm text-neutral-700">
@@ -112,7 +137,7 @@ export function HomeScreen() {
       ) : null}
       {isChargersError ? (
         <View
-          className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-4 shadow"
+          className="absolute inset-x-5 top-48 rounded-md bg-white px-4 py-4 shadow"
           pointerEvents="none"
         >
           <Text className="text-base font-semibold text-neutral-950">
@@ -132,6 +157,11 @@ export function HomeScreen() {
           </Text>
         </View>
       ) : null}
+      <SearchBar
+        errorMessage={searchError}
+        isLoading={isSearching}
+        onSubmit={(query) => void handleSearch(query)}
+      />
       <MyLocationButton
         disabled={isLoading}
         onPress={() => {
