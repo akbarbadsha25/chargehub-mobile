@@ -7,7 +7,6 @@ import {
   TextInput,
   View
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type SearchBarProps = {
   errorMessage: string | null;
@@ -20,7 +19,6 @@ export function SearchBar({
   isLoading,
   onSubmit
 }: SearchBarProps) {
-  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const normalizedQuery = query.trim();
 
@@ -34,7 +32,7 @@ export function SearchBar({
   };
 
   return (
-    <View className="absolute inset-x-4" style={{ top: insets.top + 12 }}>
+    <View>
       <View className="h-12 flex-row items-center rounded-md bg-white px-4 shadow">
         <TextInput
           accessibilityLabel="Search for a place"

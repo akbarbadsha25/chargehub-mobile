@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChargerBottomSheet } from '@/components/ChargerBottomSheet';
+import { FilterChips } from '@/components/FilterChips';
 import { LoadingState } from '@/components/LoadingState';
 import { ChargeHubMapHandle, MapView } from '@/components/MapView';
 import { MyLocationButton } from '@/components/MyLocationButton';
@@ -12,10 +14,13 @@ import { useNearbyChargers } from '@/hooks/useNearbyChargers';
 import { Charger } from '@/services/chargers';
 import { geocodePlace } from '@/services/geocoding';
 import { locationPermissionStatus } from '@/services/location';
+import { ChargerFilter, filterChargers } from '@/utils/filterChargers';
 
 export function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const mapRef = useRef<ChargeHubMapHandle>(null);
   const [selectedCharger, setSelectedCharger] = useState<Charger | null>(null);
+  const [selectedFilters, setSelectedFilters] = useState<ChargerFilter[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const {
@@ -46,6 +51,14 @@ export function HomeScreen() {
     chargers.length === 0;
   const isRefreshingChargers =
     isChargersFetching && !isChargersPending && chargers.length > 0;
+  const filteredChargers = useMemo(
+    () => filterChargers(chargers, selectedFilters),
+    [chargers, selectedFilters]
+  );
+  const showFilterEmpty =
+    selectedFilters.length > 0 &&
+    chargers.length > 0 &&
+    filteredChargers.length === 0;
 
   useEffect(() => {
     if (!selectedCharger || !visibleRegion) {
@@ -91,11 +104,20 @@ export function HomeScreen() {
     }
   };
 
+  const handleToggleFilter = (filter: ChargerFilter) => {
+    setSelectedCharger(null);
+    setSelectedFilters((currentFilters) =>
+      currentFilters.includes(filter)
+        ? currentFilters.filter((currentFilter) => currentFilter !== filter)
+        : [...currentFilters, filter]
+    );
+  };
+
   return (
     <View className="flex-1 bg-white">
       <MapView
         ref={mapRef}
-        chargers={chargers}
+        chargers={filteredChargers}
         location={location}
         onChargerPress={setSelectedCharger}
         onRegionChangeComplete={handleRegionChangeComplete}
@@ -103,7 +125,7 @@ export function HomeScreen() {
       {isLoading ? <LoadingState message="Finding your location..." /> : null}
       {showError ? (
         <View
-          className="absolute inset-x-5 top-48 rounded-md bg-white px-4 py-4 shadow"
+          className="absolute inset-x-5 top-64 rounded-md bg-white px-4 py-4 shadow"
           pointerEvents="none"
         >
           <Text className="text-base font-semibold text-neutral-950">
@@ -116,7 +138,7 @@ export function HomeScreen() {
       ) : null}
       {isChargersPending ? (
         <View
-          className="absolute inset-x-5 top-48 rounded-md bg-white px-4 py-3 shadow"
+          className="absolute inset-x-5 top-64 rounded-md bg-white px-4 py-3 shadow"
           pointerEvents="none"
         >
           <Text className="text-sm text-neutral-700">
@@ -126,7 +148,7 @@ export function HomeScreen() {
       ) : null}
       {isRefreshingChargers ? (
         <View
-          className="absolute right-5 top-48 h-10 w-10 items-center justify-center rounded-full bg-white shadow"
+          className="absolute right-5 top-64 h-10 w-10 items-center justify-center rounded-full bg-white shadow"
           pointerEvents="none"
         >
           <ActivityIndicator size="small" />
@@ -134,7 +156,7 @@ export function HomeScreen() {
       ) : null}
       {showChargersEmpty ? (
         <View
-          className="absolute inset-x-5 top-48 rounded-md bg-white px-4 py-3 shadow"
+          className="absolute inset-x-5 top-64 rounded-md bg-white px-4 py-3 shadow"
           pointerEvents="none"
         >
           <Text className="text-sm text-neutral-700">
@@ -144,7 +166,7 @@ export function HomeScreen() {
       ) : null}
       {isChargersError ? (
         <View
-          className="absolute inset-x-5 top-48 rounded-md bg-white px-4 py-4 shadow"
+          className="absolute inset-x-5 top-64 rounded-md bg-white px-4 py-4 shadow"
           pointerEvents="none"
         >
           <Text className="text-base font-semibold text-neutral-950">
@@ -164,11 +186,19 @@ export function HomeScreen() {
           </Text>
         </View>
       ) : null}
-      <SearchBar
-        errorMessage={searchError}
-        isLoading={isSearching}
-        onSubmit={(query) => void handleSearch(query)}
-      />
+      <View className="absolute inset-x-4" style={{ top: insets.top + 12 }}>
+        <SearchBar
+          errorMessage={searchError}
+          isLoading={isSearching}
+          onSubmit={(query) => void handleSearch(query)}
+        />
+        <FilterChips
+          chargerCount={filteredChargers.length}
+          onToggle={handleToggleFilter}
+          selectedFilters={selectedFilters}
+          showEmptyState={showFilterEmpty}
+        />
+      </View>
       <MyLocationButton
         disabled={isLoading}
         onPress={() => {

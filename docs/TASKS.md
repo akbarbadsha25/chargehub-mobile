@@ -82,7 +82,10 @@
 - [x] Native place geocoding
 - [x] Search map movement
 - [x] Search loading and error states
-- [ ] Filters
+- [x] Client-side charger filters
+- [x] Connector filter chips
+- [x] Minimum power filter
+- [x] Filter count and empty state
 - [x] Charger Details
 - [x] Charger details bottom sheet
 - [x] External map directions

@@ -36,10 +36,12 @@ type OpenChargeMapPoi = {
 export type Charger = {
   address: string | null;
   connectorType: string | null;
+  connectorTypes: string[];
   distanceKm: number | null;
   id: string;
   latitude: number;
   longitude: number;
+  maxPowerKw: number | null;
   name: string;
   powerKw: number | null;
   provider: string | null;
@@ -64,9 +66,20 @@ function normalizeAddress(
 function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
   const latitude = poi.AddressInfo?.Latitude;
   const longitude = poi.AddressInfo?.Longitude;
-  const connection = poi.Connections?.find(
+  const connections = poi.Connections ?? [];
+  const connection = connections.find(
     (item) => item.ConnectionType?.Title || typeof item.PowerKW === 'number'
   );
+  const connectorTypes = [
+    ...new Set(
+      connections
+        .map((item) => item.ConnectionType?.Title?.trim())
+        .filter((title): title is string => Boolean(title))
+    )
+  ];
+  const powerValues = connections
+    .map((item) => item.PowerKW)
+    .filter((power): power is number => typeof power === 'number');
 
   if (typeof latitude !== 'number' || typeof longitude !== 'number') {
     return null;
@@ -75,6 +88,7 @@ function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
   return {
     address: normalizeAddress(poi.AddressInfo),
     connectorType: connection?.ConnectionType?.Title?.trim() || null,
+    connectorTypes,
     distanceKm:
       typeof poi.AddressInfo?.Distance === 'number'
         ? poi.AddressInfo.Distance
@@ -82,6 +96,7 @@ function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
     id: String(poi.ID),
     latitude,
     longitude,
+    maxPowerKw: powerValues.length > 0 ? Math.max(...powerValues) : null,
     name: poi.AddressInfo?.Title?.trim() || 'Unnamed charger',
     powerKw:
       typeof connection?.PowerKW === 'number' ? connection.PowerKW : null,
