@@ -7,7 +7,7 @@ import { ChargeHubMapHandle, MapView } from '@/components/MapView';
 import { MyLocationButton } from '@/components/MyLocationButton';
 import { SearchBar } from '@/components/SearchBar';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
-import { useMapRegion } from '@/hooks/useMapRegion';
+import { searchMapRegionDelta, useMapRegion } from '@/hooks/useMapRegion';
 import { useNearbyChargers } from '@/hooks/useNearbyChargers';
 import { Charger } from '@/services/chargers';
 import { geocodePlace } from '@/services/geocoding';
@@ -76,7 +76,14 @@ export function HomeScreen() {
         return;
       }
 
-      mapRef.current?.moveToCoordinates(coordinates);
+      if (coordinates.isBroad) {
+        setSearchError(
+          'That result is too broad. Add a city, area, or street and try again.'
+        );
+        return;
+      }
+
+      mapRef.current?.moveToCoordinates(coordinates, searchMapRegionDelta);
     } catch {
       setSearchError('Unable to search right now. Please try again.');
     } finally {

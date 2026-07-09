@@ -4,6 +4,7 @@ import { Region } from 'react-native-maps';
 import { Coordinates } from '@/services/location';
 
 export const defaultMapRegionDelta = 0.045;
+export const searchMapRegionDelta = 0.025;
 
 function createRegion(center: Coordinates): Region {
   return {

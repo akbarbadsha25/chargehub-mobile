@@ -13,7 +13,7 @@ import { Charger } from '@/services/chargers';
 import { Coordinates, CurrentLocation } from '@/services/location';
 
 export type ChargeHubMapHandle = {
-  moveToCoordinates: (coordinates: Coordinates) => void;
+  moveToCoordinates: (coordinates: Coordinates, regionDelta?: number) => void;
   recenter: () => void;
 };
 
@@ -24,12 +24,15 @@ type ChargeHubMapProps = {
   onRegionChangeComplete: (region: Region) => void;
 };
 
-function getRegion(coordinates: Coordinates): Region {
+function getRegion(
+  coordinates: Coordinates,
+  regionDelta = defaultMapRegionDelta
+): Region {
   return {
     latitude: coordinates.latitude,
-    latitudeDelta: defaultMapRegionDelta,
+    latitudeDelta: regionDelta,
     longitude: coordinates.longitude,
-    longitudeDelta: defaultMapRegionDelta
+    longitudeDelta: regionDelta
   };
 }
 
@@ -40,9 +43,15 @@ export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
   ) {
     const mapRef = useRef<RNMapView>(null);
 
-    const moveToCoordinates = useCallback((coordinates: Coordinates) => {
-      mapRef.current?.animateToRegion(getRegion(coordinates), 500);
-    }, []);
+    const moveToCoordinates = useCallback(
+      (coordinates: Coordinates, regionDelta?: number) => {
+        mapRef.current?.animateToRegion(
+          getRegion(coordinates, regionDelta),
+          500
+        );
+      },
+      []
+    );
 
     const recenter = useCallback(() => {
       if (!location) {
