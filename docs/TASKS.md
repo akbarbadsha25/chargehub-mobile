@@ -68,6 +68,7 @@
 - [x] Formatted location values
 - [x] Marker Rendering
 - [x] Marker callouts
+- [x] Marker selection
 - [ ] Marker Clustering
 
 ---
@@ -76,7 +77,9 @@
 
 - [ ] Search
 - [ ] Filters
-- [ ] Charger Details
+- [x] Charger Details
+- [x] Charger details bottom sheet
+- [x] Disabled navigation placeholder
 - [ ] Google Navigation
 
 ---

@@ -5,9 +5,21 @@ const nearbyRadiusKm = 5;
 const maxResults = 50;
 
 type OpenChargeMapAddressInfo = {
+  AddressLine1?: string;
+  Distance?: number;
   Latitude?: number;
   Longitude?: number;
+  Postcode?: string;
+  StateOrProvince?: string;
   Title?: string;
+  Town?: string;
+};
+
+type OpenChargeMapConnection = {
+  ConnectionType?: {
+    Title?: string;
+  };
+  PowerKW?: number;
 };
 
 type OpenChargeMapOperatorInfo = {
@@ -16,31 +28,63 @@ type OpenChargeMapOperatorInfo = {
 
 type OpenChargeMapPoi = {
   AddressInfo?: OpenChargeMapAddressInfo;
+  Connections?: OpenChargeMapConnection[];
   ID: number;
   OperatorInfo?: OpenChargeMapOperatorInfo;
 };
 
 export type Charger = {
+  address: string | null;
+  connectorType: string | null;
+  distanceKm: number | null;
   id: string;
   latitude: number;
   longitude: number;
   name: string;
+  powerKw: number | null;
   provider: string | null;
 };
+
+function normalizeAddress(
+  addressInfo?: OpenChargeMapAddressInfo
+): string | null {
+  const address = [
+    addressInfo?.AddressLine1,
+    addressInfo?.Town,
+    addressInfo?.StateOrProvince,
+    addressInfo?.Postcode
+  ]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(', ');
+
+  return address || null;
+}
 
 function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
   const latitude = poi.AddressInfo?.Latitude;
   const longitude = poi.AddressInfo?.Longitude;
+  const connection = poi.Connections?.find(
+    (item) => item.ConnectionType?.Title || typeof item.PowerKW === 'number'
+  );
 
   if (typeof latitude !== 'number' || typeof longitude !== 'number') {
     return null;
   }
 
   return {
+    address: normalizeAddress(poi.AddressInfo),
+    connectorType: connection?.ConnectionType?.Title?.trim() || null,
+    distanceKm:
+      typeof poi.AddressInfo?.Distance === 'number'
+        ? poi.AddressInfo.Distance
+        : null,
     id: String(poi.ID),
     latitude,
     longitude,
     name: poi.AddressInfo?.Title?.trim() || 'Unnamed charger',
+    powerKw:
+      typeof connection?.PowerKW === 'number' ? connection.PowerKW : null,
     provider: poi.OperatorInfo?.Title?.trim() || null
   };
 }

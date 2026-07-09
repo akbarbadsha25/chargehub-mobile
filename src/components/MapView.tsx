@@ -21,6 +21,7 @@ export type ChargeHubMapHandle = {
 type ChargeHubMapProps = {
   chargers: Charger[];
   location: CurrentLocation | null;
+  onChargerPress: (charger: Charger) => void;
 };
 
 function getRegion(location: CurrentLocation): Region {
@@ -33,7 +34,7 @@ function getRegion(location: CurrentLocation): Region {
 }
 
 export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
-  function MapView({ chargers, location }, ref) {
+  function MapView({ chargers, location, onChargerPress }, ref) {
     const mapRef = useRef<RNMapView>(null);
 
     const recenter = useCallback(() => {
@@ -69,6 +70,7 @@ export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
               longitude: charger.longitude
             }}
             description={charger.provider ?? undefined}
+            onPress={() => onChargerPress(charger)}
             title={charger.name}
           />
         ))}

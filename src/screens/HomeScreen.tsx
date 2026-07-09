@@ -1,15 +1,18 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 
+import { ChargerBottomSheet } from '@/components/ChargerBottomSheet';
 import { LoadingState } from '@/components/LoadingState';
 import { ChargeHubMapHandle, MapView } from '@/components/MapView';
 import { MyLocationButton } from '@/components/MyLocationButton';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { useNearbyChargers } from '@/hooks/useNearbyChargers';
+import { Charger } from '@/services/chargers';
 import { locationPermissionStatus } from '@/services/location';
 
 export function HomeScreen() {
   const mapRef = useRef<ChargeHubMapHandle>(null);
+  const [selectedCharger, setSelectedCharger] = useState<Charger | null>(null);
   const {
     errorMessage,
     isLoading,
@@ -36,7 +39,12 @@ export function HomeScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <MapView ref={mapRef} chargers={chargers} location={location} />
+      <MapView
+        ref={mapRef}
+        chargers={chargers}
+        location={location}
+        onChargerPress={setSelectedCharger}
+      />
       {isLoading ? <LoadingState message="Finding your location..." /> : null}
       {showError ? (
         <View
@@ -104,6 +112,12 @@ export function HomeScreen() {
           mapRef.current?.recenter();
         }}
       />
+      {selectedCharger ? (
+        <ChargerBottomSheet
+          charger={selectedCharger}
+          onClose={() => setSelectedCharger(null)}
+        />
+      ) : null}
     </View>
   );
 }
