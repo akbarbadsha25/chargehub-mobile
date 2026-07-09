@@ -1,4 +1,4 @@
-import { CurrentLocation } from '@/services/location';
+import { Coordinates } from '@/services/location';
 
 const openChargeMapBaseUrl = 'https://api.openchargemap.io/v3/poi/';
 const nearbyRadiusKm = 5;
@@ -90,7 +90,7 @@ function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
 }
 
 export async function getNearbyChargers(
-  location: CurrentLocation
+  location: Coordinates
 ): Promise<Charger[]> {
   const apiKey = process.env.EXPO_PUBLIC_OPENCHARGEMAP_API_KEY;
 

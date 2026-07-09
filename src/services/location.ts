@@ -2,10 +2,13 @@ import * as Location from 'expo-location';
 
 export type LocationPermissionStatus = Location.PermissionStatus | 'unknown';
 
-export type CurrentLocation = {
-  accuracy: number | null;
+export type Coordinates = {
   latitude: number;
   longitude: number;
+};
+
+export type CurrentLocation = Coordinates & {
+  accuracy: number | null;
 };
 
 export async function requestLocationPermission() {

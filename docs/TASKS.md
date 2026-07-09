@@ -69,6 +69,9 @@
 - [x] Marker Rendering
 - [x] Marker callouts
 - [x] Marker selection
+- [x] Visible region charger loading
+- [x] Debounced map region refresh
+- [x] Refresh loading indicator
 - [ ] Marker Clustering
 
 ---

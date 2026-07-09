@@ -1,19 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getNearbyChargers } from '@/services/chargers';
-import { CurrentLocation } from '@/services/location';
+import { Coordinates } from '@/services/location';
 
-export function useNearbyChargers(location: CurrentLocation | null) {
+export function useNearbyChargers(center: Coordinates | null) {
   return useQuery({
-    enabled: location !== null,
+    enabled: center !== null,
+    placeholderData: (previousData) => previousData,
     queryFn: () => {
-      if (!location) {
+      if (!center) {
         return Promise.resolve([]);
       }
 
-      return getNearbyChargers(location);
+      return getNearbyChargers(center);
     },
-    queryKey: ['nearby-chargers', location?.latitude, location?.longitude],
+    queryKey: ['nearby-chargers', center?.latitude, center?.longitude],
     retry: 1
   });
 }

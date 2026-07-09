@@ -1,11 +1,12 @@
-import { useRef, useState } from 'react';
-import { Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 
 import { ChargerBottomSheet } from '@/components/ChargerBottomSheet';
 import { LoadingState } from '@/components/LoadingState';
 import { ChargeHubMapHandle, MapView } from '@/components/MapView';
 import { MyLocationButton } from '@/components/MyLocationButton';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
+import { useMapRegion } from '@/hooks/useMapRegion';
 import { useNearbyChargers } from '@/hooks/useNearbyChargers';
 import { Charger } from '@/services/chargers';
 import { locationPermissionStatus } from '@/services/location';
@@ -21,21 +22,42 @@ export function HomeScreen() {
     retry,
     showRetry
   } = useCurrentLocation();
+  const { handleRegionChangeComplete, queryCenter, visibleRegion } =
+    useMapRegion(location);
   const {
     data: chargers = [],
     error: chargersError,
     isError: isChargersError,
-    isFetching: isChargersLoading
-  } = useNearbyChargers(location);
+    isFetching: isChargersFetching,
+    isPending: isChargersPending
+  } = useNearbyChargers(queryCenter);
 
   const isPermissionDenied =
     permissionStatus === locationPermissionStatus.DENIED;
   const showError = isPermissionDenied || errorMessage !== null;
   const showChargersEmpty =
-    Boolean(location) &&
-    !isChargersLoading &&
+    Boolean(queryCenter) &&
+    !isChargersFetching &&
     !isChargersError &&
     chargers.length === 0;
+  const isRefreshingChargers =
+    isChargersFetching && !isChargersPending && chargers.length > 0;
+
+  useEffect(() => {
+    if (!selectedCharger || !visibleRegion) {
+      return;
+    }
+
+    const isVisible =
+      Math.abs(selectedCharger.latitude - visibleRegion.latitude) <=
+        visibleRegion.latitudeDelta / 2 &&
+      Math.abs(selectedCharger.longitude - visibleRegion.longitude) <=
+        visibleRegion.longitudeDelta / 2;
+
+    if (!isVisible) {
+      setSelectedCharger(null);
+    }
+  }, [selectedCharger, visibleRegion]);
 
   return (
     <View className="flex-1 bg-white">
@@ -44,6 +66,7 @@ export function HomeScreen() {
         chargers={chargers}
         location={location}
         onChargerPress={setSelectedCharger}
+        onRegionChangeComplete={handleRegionChangeComplete}
       />
       {isLoading ? <LoadingState message="Finding your location..." /> : null}
       {showError ? (
@@ -59,7 +82,7 @@ export function HomeScreen() {
           </Text>
         </View>
       ) : null}
-      {isChargersLoading ? (
+      {isChargersPending ? (
         <View
           className="absolute inset-x-5 top-16 rounded-md bg-white px-4 py-3 shadow"
           pointerEvents="none"
@@ -67,6 +90,14 @@ export function HomeScreen() {
           <Text className="text-sm text-neutral-700">
             Loading nearby chargers...
           </Text>
+        </View>
+      ) : null}
+      {isRefreshingChargers ? (
+        <View
+          className="absolute right-5 top-16 h-10 w-10 items-center justify-center rounded-full bg-white shadow"
+          pointerEvents="none"
+        >
+          <ActivityIndicator size="small" />
         </View>
       ) : null}
       {showChargersEmpty ? (
