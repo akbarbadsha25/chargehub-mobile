@@ -79,8 +79,9 @@
 - [ ] Filters
 - [x] Charger Details
 - [x] Charger details bottom sheet
-- [x] Disabled navigation placeholder
-- [ ] Google Navigation
+- [x] External map directions
+- [x] Apple Maps navigation
+- [x] Google Maps navigation
 
 ---
 

@@ -1,6 +1,7 @@
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 import { Charger } from '@/services/chargers';
+import { openDirections } from '@/utils/navigation';
 
 type ChargerBottomSheetProps = {
   charger: Charger;
@@ -35,6 +36,17 @@ export function ChargerBottomSheet({
   charger,
   onClose
 }: ChargerBottomSheetProps) {
+  const handleDirections = async () => {
+    try {
+      await openDirections(charger.latitude, charger.longitude);
+    } catch {
+      Alert.alert(
+        'Unable to open maps',
+        'Please check that a maps application is available and try again.'
+      );
+    }
+  };
+
   return (
     <View className="absolute inset-x-0 bottom-0 rounded-t-lg bg-white px-5 pb-8 pt-5 shadow">
       <View className="flex-row items-start justify-between">
@@ -84,10 +96,10 @@ export function ChargerBottomSheet({
 
       <Pressable
         accessibilityRole="button"
-        className="mt-2 items-center rounded-md bg-neutral-200 px-4 py-3"
-        disabled
+        className="mt-2 items-center rounded-md bg-neutral-950 px-4 py-3"
+        onPress={() => void handleDirections()}
       >
-        <Text className="font-semibold text-neutral-500">Navigate</Text>
+        <Text className="font-semibold text-white">Get Directions</Text>
       </Pressable>
     </View>
   );
