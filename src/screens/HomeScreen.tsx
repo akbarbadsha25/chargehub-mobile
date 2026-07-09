@@ -1,5 +1,7 @@
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChargerBottomSheet } from '@/components/ChargerBottomSheet';
@@ -9,6 +11,7 @@ import { ChargeHubMapHandle, MapView } from '@/components/MapView';
 import { MyLocationButton } from '@/components/MyLocationButton';
 import { SearchBar } from '@/components/SearchBar';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
+import { useFavorites } from '@/hooks/useFavorites';
 import { searchMapRegionDelta, useMapRegion } from '@/hooks/useMapRegion';
 import { useNearbyChargers } from '@/hooks/useNearbyChargers';
 import { Charger } from '@/services/chargers';
@@ -16,13 +19,27 @@ import { geocodePlace } from '@/services/geocoding';
 import { locationPermissionStatus } from '@/services/location';
 import { ChargerFilter, filterChargers } from '@/utils/filterChargers';
 
-export function HomeScreen() {
+import type { MainTabParamList } from '@/navigation/RootNavigator';
+
+type HomeScreenProps = BottomTabScreenProps<MainTabParamList, 'Home'>;
+
+function isChargerVisible(charger: Charger, region: Region) {
+  return (
+    Math.abs(charger.latitude - region.latitude) <= region.latitudeDelta / 2 &&
+    Math.abs(charger.longitude - region.longitude) <= region.longitudeDelta / 2
+  );
+}
+
+export function HomeScreen({ route }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<ChargeHubMapHandle>(null);
   const [selectedCharger, setSelectedCharger] = useState<Charger | null>(null);
   const [selectedFilters, setSelectedFilters] = useState<ChargerFilter[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [focusedFavoriteId, setFocusedFavoriteId] = useState<string | null>(
+    null
+  );
   const {
     errorMessage,
     isLoading,
@@ -31,6 +48,7 @@ export function HomeScreen() {
     retry,
     showRetry
   } = useCurrentLocation();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const { handleRegionChangeComplete, queryCenter, visibleRegion } =
     useMapRegion(location);
   const {
@@ -65,16 +83,30 @@ export function HomeScreen() {
       return;
     }
 
-    const isVisible =
-      Math.abs(selectedCharger.latitude - visibleRegion.latitude) <=
-        visibleRegion.latitudeDelta / 2 &&
-      Math.abs(selectedCharger.longitude - visibleRegion.longitude) <=
-        visibleRegion.longitudeDelta / 2;
+    if (focusedFavoriteId === selectedCharger.id) {
+      if (isChargerVisible(selectedCharger, visibleRegion)) {
+        setFocusedFavoriteId(null);
+      }
 
-    if (!isVisible) {
+      return;
+    }
+
+    if (!isChargerVisible(selectedCharger, visibleRegion)) {
       setSelectedCharger(null);
     }
-  }, [selectedCharger, visibleRegion]);
+  }, [focusedFavoriteId, selectedCharger, visibleRegion]);
+
+  useEffect(() => {
+    const favoriteCharger = route.params?.charger;
+
+    if (!favoriteCharger) {
+      return;
+    }
+
+    setSelectedCharger(favoriteCharger);
+    setFocusedFavoriteId(favoriteCharger.id);
+    mapRef.current?.moveToCoordinates(favoriteCharger, searchMapRegionDelta);
+  }, [route.params?.charger, route.params?.focusRequestId]);
 
   const handleSearch = async (query: string) => {
     setSelectedCharger(null);
@@ -213,7 +245,9 @@ export function HomeScreen() {
       {selectedCharger ? (
         <ChargerBottomSheet
           charger={selectedCharger}
+          isFavorite={isFavorite(selectedCharger.id)}
           onClose={() => setSelectedCharger(null)}
+          onToggleFavorite={() => void toggleFavorite(selectedCharger)}
         />
       ) : null}
     </View>

@@ -91,6 +91,11 @@
 - [x] External map directions
 - [x] Apple Maps navigation
 - [x] Google Maps navigation
+- [x] Local favorite chargers
+- [x] Favorite persistence with AsyncStorage
+- [x] Favorites screen
+- [x] Bottom tab navigation
+- [x] Favorite charger map focus
 
 ---
 

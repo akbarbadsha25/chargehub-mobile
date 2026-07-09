@@ -1,11 +1,14 @@
 import { Alert, Pressable, Text, View } from 'react-native';
 
+import { FavoriteButton } from '@/components/FavoriteButton';
 import { Charger } from '@/services/chargers';
 import { openDirections } from '@/utils/navigation';
 
 type ChargerBottomSheetProps = {
   charger: Charger;
+  isFavorite: boolean;
   onClose: () => void;
+  onToggleFavorite: () => void;
 };
 
 type DetailRowProps = {
@@ -34,6 +37,8 @@ function DetailRow({ icon, label, value }: DetailRowProps) {
 
 export function ChargerBottomSheet({
   charger,
+  isFavorite,
+  onToggleFavorite,
   onClose
 }: ChargerBottomSheetProps) {
   const handleDirections = async () => {
@@ -60,15 +65,18 @@ export function ChargerBottomSheet({
             </Text>
           ) : null}
         </View>
-        <Pressable
-          accessibilityLabel="Close charger details"
-          accessibilityRole="button"
-          className="h-10 w-10 items-center justify-center rounded-full bg-neutral-100"
-          hitSlop={8}
-          onPress={onClose}
-        >
-          <Text className="text-lg font-semibold text-neutral-700">X</Text>
-        </Pressable>
+        <View className="flex-row">
+          <FavoriteButton isFavorite={isFavorite} onPress={onToggleFavorite} />
+          <Pressable
+            accessibilityLabel="Close charger details"
+            accessibilityRole="button"
+            className="ml-2 h-10 w-10 items-center justify-center rounded-full bg-neutral-100"
+            hitSlop={8}
+            onPress={onClose}
+          >
+            <Text className="text-lg font-semibold text-neutral-700">X</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View className="mt-4">
