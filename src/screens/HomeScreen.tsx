@@ -17,6 +17,7 @@ import { useNearbyChargers } from '@/hooks/useNearbyChargers';
 import { Charger } from '@/services/chargers';
 import { geocodePlace } from '@/services/geocoding';
 import { locationPermissionStatus } from '@/services/location';
+import { useChargeHubDiagnosticsStore } from '@/store';
 import { ChargerFilter, filterChargers } from '@/utils/filterChargers';
 
 import type { MainTabParamList } from '@/navigation/RootNavigator';
@@ -49,6 +50,9 @@ export function HomeScreen({ route }: HomeScreenProps) {
     showRetry
   } = useCurrentLocation();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const setHomeDiagnostics = useChargeHubDiagnosticsStore(
+    (state) => state.setHomeDiagnostics
+  );
   const { handleRegionChangeComplete, queryCenter, visibleRegion } =
     useMapRegion(location);
   const {
@@ -77,6 +81,21 @@ export function HomeScreen({ route }: HomeScreenProps) {
     selectedFilters.length > 0 &&
     chargers.length > 0 &&
     filteredChargers.length === 0;
+
+  useEffect(() => {
+    setHomeDiagnostics({
+      activeFilters: selectedFilters,
+      chargerCount: chargers.length,
+      lastKnownLocation: location,
+      permissionStatus
+    });
+  }, [
+    chargers.length,
+    location,
+    permissionStatus,
+    selectedFilters,
+    setHomeDiagnostics
+  ]);
 
   useEffect(() => {
     if (!selectedCharger || !visibleRegion) {

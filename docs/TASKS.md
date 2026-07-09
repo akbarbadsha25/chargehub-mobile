@@ -96,6 +96,10 @@
 - [x] Favorites screen
 - [x] Bottom tab navigation
 - [x] Favorite charger map focus
+- [x] Diagnostics screen
+- [x] Local beta feedback form
+- [x] Submitted feedback persistence with AsyncStorage
+- [x] Diagnostics app and system info
 
 ---
 

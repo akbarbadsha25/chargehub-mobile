@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { Text, View } from 'react-native';
 
+import { DiagnosticsScreen } from '@/screens/DiagnosticsScreen';
 import { FavoritesScreen } from '@/screens/FavoritesScreen';
 import { HomeScreen } from '@/screens/HomeScreen';
 
@@ -55,9 +56,7 @@ export function RootNavigator() {
       >
         <Tab.Screen component={HomeScreen} name="Home" />
         <Tab.Screen component={FavoritesScreen} name="Favorites" />
-        <Tab.Screen name="Diagnostics">
-          {() => <PlaceholderScreen title="Diagnostics" />}
-        </Tab.Screen>
+        <Tab.Screen component={DiagnosticsScreen} name="Diagnostics" />
         <Tab.Screen name="Settings">
           {() => <PlaceholderScreen title="Settings" />}
         </Tab.Screen>
