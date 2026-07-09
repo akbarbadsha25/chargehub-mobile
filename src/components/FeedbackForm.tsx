@@ -30,6 +30,7 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
   const [contact, setContact] = useState('');
   const [message, setMessage] = useState('');
   const [type, setType] = useState<FeedbackType>('bug');
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
@@ -38,7 +39,8 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
 
   const handleSubmit = async () => {
     if (!normalizedMessage || isSubmitting) {
-      setValidationMessage('Add a short message before submitting.');
+      setSubmitMessage(null);
+      setValidationMessage('Please enter your feedback.');
       return;
     }
 
@@ -48,8 +50,8 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
       message: normalizedMessage,
       type
     });
-    setContact('');
     setMessage('');
+    setSubmitMessage('Feedback saved. Thank you.');
     setType('bug');
   };
 
@@ -106,6 +108,9 @@ export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
       />
       {validationMessage ? (
         <Text className="mt-2 text-sm text-red-700">{validationMessage}</Text>
+      ) : null}
+      {submitMessage ? (
+        <Text className="mt-2 text-sm text-green-700">{submitMessage}</Text>
       ) : null}
       <Pressable
         accessibilityRole="button"
