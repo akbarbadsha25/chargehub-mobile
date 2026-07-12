@@ -6,6 +6,10 @@ const maxResults = 50;
 
 type OpenChargeMapAddressInfo = {
   AddressLine1?: string;
+  AddressLine2?: string;
+  Country?: {
+    Title?: string;
+  };
   Distance?: number;
   Latitude?: number;
   Longitude?: number;
@@ -26,11 +30,29 @@ type OpenChargeMapOperatorInfo = {
   Title?: string;
 };
 
+type OpenChargeMapMediaItem = {
+  Attribution?: string;
+  Comment?: string;
+  ID?: number;
+  IsEnabled?: boolean;
+  IsExternalResource?: boolean;
+  ItemThumbnailURL?: string;
+  ItemURL?: string;
+};
+
 type OpenChargeMapPoi = {
   AddressInfo?: OpenChargeMapAddressInfo;
   Connections?: OpenChargeMapConnection[];
   ID: number;
+  MediaItems?: OpenChargeMapMediaItem[];
   OperatorInfo?: OpenChargeMapOperatorInfo;
+};
+
+export type ChargerMediaItem = {
+  attribution: string | null;
+  id: string;
+  thumbnailUrl: string | null;
+  url: string;
 };
 
 export type Charger = {
@@ -42,6 +64,7 @@ export type Charger = {
   latitude: number;
   longitude: number;
   maxPowerKw: number | null;
+  media: ChargerMediaItem[];
   name: string;
   powerKw: number | null;
   provider: string | null;
@@ -52,15 +75,61 @@ function normalizeAddress(
 ): string | null {
   const address = [
     addressInfo?.AddressLine1,
+    addressInfo?.AddressLine2,
     addressInfo?.Town,
     addressInfo?.StateOrProvince,
-    addressInfo?.Postcode
+    addressInfo?.Postcode,
+    addressInfo?.Country?.Title
   ]
     .map((part) => part?.trim())
     .filter(Boolean)
     .join(', ');
 
   return address || null;
+}
+
+function isValidImageUrl(url?: string): url is string {
+  if (!url) {
+    return false;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+    const pathname = parsedUrl.pathname.toLowerCase();
+    const hasImageExtension = /\.(avif|gif|jpe?g|png|webp)$/.test(pathname);
+
+    return (
+      (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') &&
+      hasImageExtension
+    );
+  } catch {
+    return false;
+  }
+}
+
+function normalizeMediaItems(
+  mediaItems?: OpenChargeMapMediaItem[]
+): ChargerMediaItem[] {
+  if (!mediaItems) {
+    return [];
+  }
+
+  return mediaItems.flatMap((item, index) => {
+    if (item.IsEnabled === false || !isValidImageUrl(item.ItemURL)) {
+      return [];
+    }
+
+    return [
+      {
+        attribution: item.Attribution?.trim() || item.Comment?.trim() || null,
+        id: item.ID ? String(item.ID) : `${item.ItemURL}-${index}`,
+        thumbnailUrl: isValidImageUrl(item.ItemThumbnailURL)
+          ? item.ItemThumbnailURL
+          : null,
+        url: item.ItemURL
+      }
+    ];
+  });
 }
 
 function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
@@ -97,6 +166,7 @@ function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
     latitude,
     longitude,
     maxPowerKw: powerValues.length > 0 ? Math.max(...powerValues) : null,
+    media: normalizeMediaItems(poi.MediaItems),
     name: poi.AddressInfo?.Title?.trim() || 'Unnamed charger',
     powerKw:
       typeof connection?.PowerKW === 'number' ? connection.PowerKW : null,

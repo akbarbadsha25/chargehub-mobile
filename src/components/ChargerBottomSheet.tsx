@@ -1,5 +1,16 @@
-import { useEffect, useRef } from 'react';
-import { Alert, Animated, Pressable, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  Text,
+  useWindowDimensions,
+  View
+} from 'react-native';
 
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { Charger } from '@/services/chargers';
@@ -29,6 +40,74 @@ function DetailRow({ icon, value }: DetailRowProps) {
           {value}
         </Text>
       </View>
+    </View>
+  );
+}
+
+type MediaCarouselProps = {
+  media: Charger['media'];
+};
+
+function MediaCarousel({ media }: MediaCarouselProps) {
+  const { width } = useWindowDimensions();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [failedImageIds, setFailedImageIds] = useState<string[]>([]);
+  const imageWidth = width;
+  const visibleMedia = useMemo(
+    () => media.filter((item) => !failedImageIds.includes(item.id)),
+    [failedImageIds, media]
+  );
+
+  useEffect(() => {
+    if (activeIndex >= visibleMedia.length) {
+      setActiveIndex(Math.max(visibleMedia.length - 1, 0));
+    }
+  }, [activeIndex, visibleMedia.length]);
+
+  if (visibleMedia.length === 0) {
+    return null;
+  }
+
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setActiveIndex(Math.round(event.nativeEvent.contentOffset.x / imageWidth));
+  };
+
+  return (
+    <View className="-mx-5 -mt-3 mb-4 overflow-hidden rounded-t-3xl">
+      <ScrollView
+        horizontal
+        onMomentumScrollEnd={handleScrollEnd}
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+      >
+        {visibleMedia.map((item) => (
+          <View key={item.id} style={{ width: imageWidth }}>
+            <Image
+              accessibilityLabel={item.attribution ?? 'Charging station photo'}
+              className="h-40 w-full bg-neutral-100"
+              onError={() =>
+                setFailedImageIds((currentIds) => [...currentIds, item.id])
+              }
+              resizeMode="cover"
+              source={{ uri: item.url }}
+            />
+            {item.attribution ? (
+              <View className="absolute bottom-2 left-3 max-w-[80%] rounded-full bg-black/60 px-2 py-1">
+                <Text className="text-[10px] font-medium text-white">
+                  {item.attribution}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        ))}
+      </ScrollView>
+      {visibleMedia.length > 1 ? (
+        <View className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-1">
+          <Text className="text-xs font-semibold text-white">
+            {activeIndex + 1}/{visibleMedia.length}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -77,6 +156,7 @@ export function ChargerBottomSheet({
   const translateY = useRef(new Animated.Value(320)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const previousChargerId = useRef<string | null>(null);
+  const hasMedia = charger.media.length > 0;
 
   useEffect(() => {
     const isFirstOpen = previousChargerId.current === null;
@@ -136,9 +216,35 @@ export function ChargerBottomSheet({
       className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white px-5 pb-5 pt-3 shadow"
       style={{ opacity, transform: [{ translateY }] }}
     >
-      <View className="mb-4 items-center">
-        <View className="h-1 w-12 rounded-full bg-neutral-300" />
-      </View>
+      {hasMedia ? <MediaCarousel media={charger.media} /> : null}
+
+      {!hasMedia ? (
+        <View className="mb-4 items-center">
+          <View className="h-1 w-12 rounded-full bg-neutral-300" />
+        </View>
+      ) : null}
+
+      {hasMedia ? (
+        <View className="absolute left-5 right-5 top-3 flex-row items-start justify-between">
+          <View className="absolute left-1/2 top-0 -ml-6 h-1 w-12 rounded-full bg-white/80" />
+          <View className="flex-1" />
+          <View className="flex-row">
+            <FavoriteButton
+              isFavorite={isFavorite}
+              onPress={onToggleFavorite}
+            />
+            <Pressable
+              accessibilityLabel="Close charger details"
+              accessibilityRole="button"
+              className="ml-2 h-11 w-11 items-center justify-center rounded-full bg-white/95"
+              hitSlop={8}
+              onPress={handleClose}
+            >
+              <Text className="text-lg font-semibold text-neutral-700">X</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
 
       <View className="flex-row items-start justify-between">
         <View className="mr-4 flex-1">
@@ -154,18 +260,23 @@ export function ChargerBottomSheet({
             </Text>
           ) : null}
         </View>
-        <View className="flex-row">
-          <FavoriteButton isFavorite={isFavorite} onPress={onToggleFavorite} />
-          <Pressable
-            accessibilityLabel="Close charger details"
-            accessibilityRole="button"
-            className="ml-2 h-11 w-11 items-center justify-center rounded-full bg-neutral-100"
-            hitSlop={8}
-            onPress={handleClose}
-          >
-            <Text className="text-lg font-semibold text-neutral-700">X</Text>
-          </Pressable>
-        </View>
+        {!hasMedia ? (
+          <View className="flex-row">
+            <FavoriteButton
+              isFavorite={isFavorite}
+              onPress={onToggleFavorite}
+            />
+            <Pressable
+              accessibilityLabel="Close charger details"
+              accessibilityRole="button"
+              className="ml-2 h-11 w-11 items-center justify-center rounded-full bg-neutral-100"
+              hitSlop={8}
+              onPress={handleClose}
+            >
+              <Text className="text-lg font-semibold text-neutral-700">X</Text>
+            </Pressable>
+          </View>
+        ) : null}
       </View>
 
       {isLoadingDetails ? (
@@ -205,6 +316,8 @@ export function ChargerBottomSheet({
           {charger.address ? (
             <DetailRow icon="⌖" value={charger.address} />
           ) : null}
+
+          <View className="mt-4 h-px bg-neutral-100" />
 
           <View className="mt-4 flex-row">
             <StatCard

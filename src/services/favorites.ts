@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { Charger } from '@/services/chargers';
+import { Charger, ChargerMediaItem } from '@/services/chargers';
 
 const favoritesStorageKey = 'chargehub:favorites';
 
@@ -10,6 +10,33 @@ const listeners = new Set<FavoritesListener>();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
+}
+
+function normalizeMedia(value: unknown): ChargerMediaItem[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap((item) => {
+    if (
+      !isRecord(item) ||
+      typeof item.id !== 'string' ||
+      typeof item.url !== 'string'
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        attribution:
+          typeof item.attribution === 'string' ? item.attribution : null,
+        id: item.id,
+        thumbnailUrl:
+          typeof item.thumbnailUrl === 'string' ? item.thumbnailUrl : null,
+        url: item.url
+      }
+    ];
+  });
 }
 
 function normalizeFavorite(value: unknown): Charger | null {
@@ -42,6 +69,7 @@ function normalizeFavorite(value: unknown): Charger | null {
     latitude,
     longitude,
     maxPowerKw: typeof value.maxPowerKw === 'number' ? value.maxPowerKw : null,
+    media: normalizeMedia(value.media),
     name,
     powerKw: typeof value.powerKw === 'number' ? value.powerKw : null,
     provider: typeof value.provider === 'string' ? value.provider : null
