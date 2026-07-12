@@ -31,6 +31,15 @@ function isChargerVisible(charger: Charger, region: Region) {
   );
 }
 
+function getSheetAwareCenter(charger: Charger, region: Region | null) {
+  const latitudeDelta = region?.latitudeDelta ?? searchMapRegionDelta;
+
+  return {
+    latitude: charger.latitude - latitudeDelta * 0.18,
+    longitude: charger.longitude
+  };
+}
+
 export function HomeScreen({ route }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<ChargeHubMapHandle>(null);
@@ -128,7 +137,10 @@ export function HomeScreen({ route }: HomeScreenProps) {
 
     setSelectedCharger(favoriteCharger);
     setFocusedFavoriteId(favoriteCharger.id);
-    mapRef.current?.moveToCoordinates(favoriteCharger, searchMapRegionDelta);
+    mapRef.current?.moveToCoordinates(
+      getSheetAwareCenter(favoriteCharger, null),
+      searchMapRegionDelta
+    );
   }, [route.params?.charger, route.params?.focusRequestId]);
 
   const handleSearch = async (query: string) => {
@@ -160,6 +172,14 @@ export function HomeScreen({ route }: HomeScreenProps) {
     }
   };
 
+  const handleSelectCharger = (charger: Charger) => {
+    setSelectedCharger(charger);
+    mapRef.current?.moveToCoordinates(
+      getSheetAwareCenter(charger, visibleRegion),
+      visibleRegion?.latitudeDelta ?? searchMapRegionDelta
+    );
+  };
+
   const handleToggleFilter = (filter: ChargerFilter) => {
     setSelectedCharger(null);
     toggleFilter(filter);
@@ -171,7 +191,7 @@ export function HomeScreen({ route }: HomeScreenProps) {
         ref={mapRef}
         chargers={filteredChargers}
         location={location}
-        onChargerPress={setSelectedCharger}
+        onChargerPress={handleSelectCharger}
         onRegionChangeComplete={handleRegionChangeComplete}
         selectedChargerId={selectedCharger?.id ?? null}
       />

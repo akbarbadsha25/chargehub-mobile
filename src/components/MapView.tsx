@@ -58,7 +58,7 @@ function ChargerMarker({ charger, isSelected, onPress }: ChargerMarkerProps) {
 
   const markerScale = scale.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 1.2]
+    outputRange: [1, 1.28]
   });
 
   return (
@@ -129,7 +129,7 @@ export const MapView = forwardRef<ChargeHubMapHandle, ChargeHubMapProps>(
         ref={mapRef}
         initialRegion={location ? getRegion(location) : undefined}
         mapPadding={{
-          bottom: selectedChargerId ? 280 : 88,
+          bottom: selectedChargerId ? 340 : 88,
           left: 16,
           right: 16,
           top: 96
