@@ -72,7 +72,14 @@ function normalizeFavorite(value: unknown): Charger | null {
     media: normalizeMedia(value.media),
     name,
     powerKw: typeof value.powerKw === 'number' ? value.powerKw : null,
-    provider: typeof value.provider === 'string' ? value.provider : null
+    provider: typeof value.provider === 'string' ? value.provider : null,
+    status:
+      value.status === 'available' ||
+      value.status === 'limited' ||
+      value.status === 'offline' ||
+      value.status === 'unknown'
+        ? value.status
+        : 'unknown'
   };
 }
 

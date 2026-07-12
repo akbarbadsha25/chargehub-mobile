@@ -46,7 +46,13 @@ type OpenChargeMapPoi = {
   ID: number;
   MediaItems?: OpenChargeMapMediaItem[];
   OperatorInfo?: OpenChargeMapOperatorInfo;
+  StatusType?: {
+    IsOperational?: boolean;
+    Title?: string;
+  };
 };
+
+export type ChargerStatus = 'available' | 'limited' | 'offline' | 'unknown';
 
 export type ChargerMediaItem = {
   attribution: string | null;
@@ -68,6 +74,7 @@ export type Charger = {
   name: string;
   powerKw: number | null;
   provider: string | null;
+  status: ChargerStatus;
 };
 
 function normalizeAddress(
@@ -132,6 +139,33 @@ function normalizeMediaItems(
   });
 }
 
+function normalizeStatus(statusType?: OpenChargeMapPoi['StatusType']) {
+  const title = statusType?.Title?.trim().toLowerCase();
+
+  if (statusType?.IsOperational === true && title === 'operational') {
+    return 'available';
+  }
+
+  if (
+    statusType?.IsOperational === false ||
+    title?.includes('not operational') ||
+    title?.includes('faulted')
+  ) {
+    return 'offline';
+  }
+
+  if (
+    title?.includes('partly') ||
+    title?.includes('limited') ||
+    title?.includes('busy') ||
+    title?.includes('temporarily unavailable')
+  ) {
+    return 'limited';
+  }
+
+  return 'unknown';
+}
+
 function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
   const latitude = poi.AddressInfo?.Latitude;
   const longitude = poi.AddressInfo?.Longitude;
@@ -170,7 +204,8 @@ function normalizeCharger(poi: OpenChargeMapPoi): Charger | null {
     name: poi.AddressInfo?.Title?.trim() || 'Unnamed charger',
     powerKw:
       typeof connection?.PowerKW === 'number' ? connection.PowerKW : null,
-    provider: poi.OperatorInfo?.Title?.trim() || null
+    provider: poi.OperatorInfo?.Title?.trim() || null,
+    status: normalizeStatus(poi.StatusType)
   };
 }
 

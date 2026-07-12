@@ -31,15 +31,14 @@ type DetailRowProps = {
 
 function DetailRow({ icon, value }: DetailRowProps) {
   return (
-    <View className="mt-4 flex-row items-start rounded-xl bg-neutral-50 p-3">
-      <View className="h-9 w-9 items-center justify-center rounded-full bg-white">
-        <Text className="text-sm font-bold text-neutral-700">{icon}</Text>
-      </View>
-      <View className="ml-3 flex-1">
-        <Text className="text-sm leading-5 text-neutral-800" numberOfLines={3}>
-          {value}
-        </Text>
-      </View>
+    <View className="mt-4 flex-row items-start">
+      <Text className="mr-3 mt-0.5 text-base text-neutral-500">{icon}</Text>
+      <Text
+        className="flex-1 text-sm leading-5 text-neutral-600"
+        numberOfLines={3}
+      >
+        {value}
+      </Text>
     </View>
   );
 }
@@ -112,22 +111,75 @@ function MediaCarousel({ media }: MediaCarouselProps) {
   );
 }
 
-type StatCardProps = {
+type StatColumnProps = {
   label: string;
   value: string;
 };
 
-function StatCard({ label, value }: StatCardProps) {
+function StatColumn({ label, value }: StatColumnProps) {
   return (
-    <View className="flex-1 rounded-xl border border-neutral-100 bg-neutral-50 p-4">
-      <Text className="text-xs font-semibold uppercase text-neutral-500">
-        {label}
-      </Text>
+    <View className="flex-1">
+      <Text className="text-[13px] font-medium text-neutral-500">{label}</Text>
       <Text
-        className="mt-2 text-base font-semibold leading-5 text-neutral-950"
+        className="mt-1 text-lg font-semibold leading-6 text-neutral-950"
         numberOfLines={2}
       >
         {value}
+      </Text>
+    </View>
+  );
+}
+
+function getStatusLabel(status: Charger['status']) {
+  if (status === 'available') {
+    return 'Available';
+  }
+
+  if (status === 'offline') {
+    return 'Offline';
+  }
+
+  if (status === 'limited') {
+    return 'Limited';
+  }
+
+  return 'Status unavailable';
+}
+
+function getStatusDotClass(status: Charger['status']) {
+  if (status === 'available') {
+    return 'bg-green-500';
+  }
+
+  if (status === 'offline') {
+    return 'bg-red-500';
+  }
+
+  if (status === 'limited') {
+    return 'bg-orange-500';
+  }
+
+  return 'bg-neutral-400';
+}
+
+function MetadataRow({ charger }: { charger: Charger }) {
+  const distanceText =
+    charger.distanceKm !== null
+      ? `${charger.distanceKm.toFixed(1)} km away`
+      : 'Distance unavailable';
+
+  return (
+    <View className="mt-2 flex-row items-center">
+      <View
+        className={`mr-2 h-2.5 w-2.5 rounded-full ${getStatusDotClass(
+          charger.status
+        )}`}
+      />
+      <Text
+        className="flex-shrink text-[15px] leading-5 text-neutral-600"
+        numberOfLines={1}
+      >
+        {getStatusLabel(charger.status)} · {distanceText}
       </Text>
     </View>
   );
@@ -259,6 +311,7 @@ export function ChargerBottomSheet({
               {charger.provider}
             </Text>
           ) : null}
+          <MetadataRow charger={charger} />
         </View>
         {!hasMedia ? (
           <View className="flex-row">
@@ -283,49 +336,19 @@ export function ChargerBottomSheet({
         <LoadingSkeleton />
       ) : (
         <>
-          <View className="mt-4 flex-row rounded-xl bg-neutral-50 p-3">
-            <View className="flex-1">
-              <Text className="text-xs font-semibold uppercase text-neutral-500">
-                Status
-              </Text>
-              <View className="mt-2 flex-row items-center">
-                <View className="mr-2 h-2.5 w-2.5 rounded-full bg-neutral-950" />
-                <Text
-                  className="text-sm font-semibold text-neutral-950"
-                  numberOfLines={1}
-                >
-                  Status unknown
-                </Text>
-              </View>
-            </View>
-            <View className="ml-4 flex-1">
-              <Text className="text-xs font-semibold uppercase text-neutral-500">
-                Distance
-              </Text>
-              <Text
-                className="mt-2 text-sm font-semibold text-neutral-950"
-                numberOfLines={1}
-              >
-                {charger.distanceKm !== null
-                  ? `${charger.distanceKm.toFixed(1)} km away`
-                  : 'Unavailable'}
-              </Text>
-            </View>
-          </View>
-
           {charger.address ? (
-            <DetailRow icon="⌖" value={charger.address} />
+            <DetailRow icon="📍" value={charger.address} />
           ) : null}
 
           <View className="mt-4 h-px bg-neutral-100" />
 
           <View className="mt-4 flex-row">
-            <StatCard
+            <StatColumn
               label="Connector"
               value={charger.connectorType ?? 'Unknown'}
             />
-            <View className="w-3" />
-            <StatCard
+            <View className="w-4" />
+            <StatColumn
               label="Power"
               value={
                 charger.powerKw !== null ? `${charger.powerKw} kW` : 'Unknown'
