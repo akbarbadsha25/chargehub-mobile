@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { FeedbackType, NewFeedback } from '@/services/feedback';
 
 type FeedbackFormProps = {
+  initialMessage?: string;
+  initialType?: FeedbackType;
   isSubmitting: boolean;
   onSubmit: (feedback: NewFeedback) => Promise<void>;
+  prefillRequestId?: string;
 };
 
 const feedbackTypeOptions: readonly {
@@ -26,16 +29,33 @@ export const feedbackTypeLabels = feedbackTypeOptions.reduce(
   {} as Record<FeedbackType, string>
 );
 
-export function FeedbackForm({ isSubmitting, onSubmit }: FeedbackFormProps) {
+export function FeedbackForm({
+  initialMessage,
+  initialType,
+  isSubmitting,
+  onSubmit,
+  prefillRequestId
+}: FeedbackFormProps) {
   const [contact, setContact] = useState('');
-  const [message, setMessage] = useState('');
-  const [type, setType] = useState<FeedbackType>('bug');
+  const [message, setMessage] = useState(initialMessage ?? '');
+  const [type, setType] = useState<FeedbackType>(initialType ?? 'bug');
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
 
   const normalizedMessage = message.trim();
+
+  useEffect(() => {
+    if (!prefillRequestId) {
+      return;
+    }
+
+    setMessage(initialMessage ?? '');
+    setType(initialType ?? 'bug');
+    setSubmitMessage(null);
+    setValidationMessage(null);
+  }, [initialMessage, initialType, prefillRequestId]);
 
   const handleSubmit = async () => {
     if (!normalizedMessage || isSubmitting) {

@@ -1,3 +1,4 @@
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { useCallback, useMemo, useState } from 'react';
@@ -17,7 +18,14 @@ import { CurrentLocation, LocationPermissionStatus } from '@/services/location';
 import { useChargeHubDiagnosticsStore } from '@/store';
 import { chargerFilterOptions } from '@/utils/filterChargers';
 
+import type { MainTabParamList } from '@/navigation/RootNavigator';
+
 const appVersion = '1.0.0';
+
+type DiagnosticsScreenProps = BottomTabScreenProps<
+  MainTabParamList,
+  'Diagnostics'
+>;
 
 type DiagnosticRowProps = {
   label: string;
@@ -47,7 +55,7 @@ function formatPermissionStatus(status: LocationPermissionStatus) {
   return status === 'unknown' ? 'Unavailable' : status;
 }
 
-export function DiagnosticsScreen() {
+export function DiagnosticsScreen({ route }: DiagnosticsScreenProps) {
   const insets = useSafeAreaInsets();
   const {
     addFeedback,
@@ -174,7 +182,13 @@ export function DiagnosticsScreen() {
       </View>
 
       <View className="mt-6">
-        <FeedbackForm isSubmitting={isSubmitting} onSubmit={addFeedback} />
+        <FeedbackForm
+          initialMessage={route.params?.initialFeedbackMessage}
+          initialType={route.params?.initialFeedbackType}
+          isSubmitting={isSubmitting}
+          onSubmit={addFeedback}
+          prefillRequestId={route.params?.reportRequestId}
+        />
       </View>
 
       <View className="mt-6 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">

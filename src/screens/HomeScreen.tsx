@@ -40,7 +40,7 @@ function getSheetAwareCenter(charger: Charger, region: Region | null) {
   };
 }
 
-export function HomeScreen({ route }: HomeScreenProps) {
+export function HomeScreen({ navigation, route }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<ChargeHubMapHandle>(null);
   const [selectedCharger, setSelectedCharger] = useState<Charger | null>(null);
@@ -185,6 +185,14 @@ export function HomeScreen({ route }: HomeScreenProps) {
     toggleFilter(filter);
   };
 
+  const handleReportIssue = (charger: Charger) => {
+    navigation.navigate('Diagnostics', {
+      initialFeedbackMessage: `Wrong charger info reported for ${charger.name} (ID: ${charger.id}).\n\n`,
+      initialFeedbackType: 'wrong_charger_info',
+      reportRequestId: `${charger.id}-${Date.now()}`
+    });
+  };
+
   return (
     <View className="flex-1 bg-white">
       <MapView
@@ -288,6 +296,7 @@ export function HomeScreen({ route }: HomeScreenProps) {
           charger={selectedCharger}
           isFavorite={isFavorite(selectedCharger.id)}
           onClose={() => setSelectedCharger(null)}
+          onReportIssue={() => handleReportIssue(selectedCharger)}
           onToggleFavorite={() => void toggleFavorite(selectedCharger)}
         />
       ) : null}

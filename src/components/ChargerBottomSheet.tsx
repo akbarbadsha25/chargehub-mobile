@@ -12,7 +12,6 @@ import {
   View
 } from 'react-native';
 
-import { FavoriteButton } from '@/components/FavoriteButton';
 import { Charger } from '@/services/chargers';
 import { openDirections } from '@/utils/navigation';
 
@@ -21,6 +20,7 @@ type ChargerBottomSheetProps = {
   isLoadingDetails?: boolean;
   isFavorite: boolean;
   onClose: () => void;
+  onReportIssue: () => void;
   onToggleFavorite: () => void;
 };
 
@@ -111,25 +111,6 @@ function MediaCarousel({ media }: MediaCarouselProps) {
   );
 }
 
-type StatColumnProps = {
-  label: string;
-  value: string;
-};
-
-function StatColumn({ label, value }: StatColumnProps) {
-  return (
-    <View className="flex-1">
-      <Text className="text-[13px] font-medium text-neutral-500">{label}</Text>
-      <Text
-        className="mt-1 text-lg font-semibold leading-6 text-neutral-950"
-        numberOfLines={2}
-      >
-        {value}
-      </Text>
-    </View>
-  );
-}
-
 function getStatusLabel(status: Charger['status']) {
   if (status === 'available') {
     return 'Available';
@@ -185,6 +166,49 @@ function MetadataRow({ charger }: { charger: Charger }) {
   );
 }
 
+function ChargerSpecsRow({ charger }: { charger: Charger }) {
+  const connector = charger.connectorType ?? 'Connector unknown';
+  const power =
+    charger.powerKw !== null ? `${charger.powerKw} kW` : 'Power unknown';
+
+  return (
+    <Text
+      className="mt-4 text-[15px] leading-5 text-neutral-600"
+      numberOfLines={2}
+    >
+      🔌 {connector} · ⚡ {power}
+    </Text>
+  );
+}
+
+type ActionChipProps = {
+  isSelected?: boolean;
+  label: string;
+  onPress: () => void;
+};
+
+function ActionChip({ isSelected = false, label, onPress }: ActionChipProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: isSelected }}
+      className={`h-11 flex-1 items-center justify-center rounded-full border px-3 ${
+        isSelected ? 'border-red-200 bg-red-50' : 'border-neutral-200 bg-white'
+      }`}
+      onPress={onPress}
+    >
+      <Text
+        className={`text-sm font-semibold ${
+          isSelected ? 'text-red-700' : 'text-neutral-800'
+        }`}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 function LoadingSkeleton() {
   return (
     <View className="mt-5">
@@ -202,6 +226,7 @@ export function ChargerBottomSheet({
   charger,
   isLoadingDetails = false,
   isFavorite,
+  onReportIssue,
   onToggleFavorite,
   onClose
 }: ChargerBottomSheetProps) {
@@ -280,21 +305,15 @@ export function ChargerBottomSheet({
         <View className="absolute left-5 right-5 top-3 flex-row items-start justify-between">
           <View className="absolute left-1/2 top-0 -ml-6 h-1 w-12 rounded-full bg-white/80" />
           <View className="flex-1" />
-          <View className="flex-row">
-            <FavoriteButton
-              isFavorite={isFavorite}
-              onPress={onToggleFavorite}
-            />
-            <Pressable
-              accessibilityLabel="Close charger details"
-              accessibilityRole="button"
-              className="ml-2 h-11 w-11 items-center justify-center rounded-full bg-white/95"
-              hitSlop={8}
-              onPress={handleClose}
-            >
-              <Text className="text-lg font-semibold text-neutral-700">X</Text>
-            </Pressable>
-          </View>
+          <Pressable
+            accessibilityLabel="Close charger details"
+            accessibilityRole="button"
+            className="h-11 w-11 items-center justify-center rounded-full bg-white/95"
+            hitSlop={8}
+            onPress={handleClose}
+          >
+            <Text className="text-lg font-semibold text-neutral-700">X</Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -314,21 +333,15 @@ export function ChargerBottomSheet({
           <MetadataRow charger={charger} />
         </View>
         {!hasMedia ? (
-          <View className="flex-row">
-            <FavoriteButton
-              isFavorite={isFavorite}
-              onPress={onToggleFavorite}
-            />
-            <Pressable
-              accessibilityLabel="Close charger details"
-              accessibilityRole="button"
-              className="ml-2 h-11 w-11 items-center justify-center rounded-full bg-neutral-100"
-              hitSlop={8}
-              onPress={handleClose}
-            >
-              <Text className="text-lg font-semibold text-neutral-700">X</Text>
-            </Pressable>
-          </View>
+          <Pressable
+            accessibilityLabel="Close charger details"
+            accessibilityRole="button"
+            className="h-11 w-11 items-center justify-center rounded-full bg-neutral-100"
+            hitSlop={8}
+            onPress={handleClose}
+          >
+            <Text className="text-lg font-semibold text-neutral-700">X</Text>
+          </Pressable>
         ) : null}
       </View>
 
@@ -342,18 +355,18 @@ export function ChargerBottomSheet({
 
           <View className="mt-4 h-px bg-neutral-100" />
 
+          <ChargerSpecsRow charger={charger} />
+
           <View className="mt-4 flex-row">
-            <StatColumn
-              label="Connector"
-              value={charger.connectorType ?? 'Unknown'}
-            />
-            <View className="w-4" />
-            <StatColumn
-              label="Power"
-              value={
-                charger.powerKw !== null ? `${charger.powerKw} kW` : 'Unknown'
+            <ActionChip
+              isSelected={isFavorite}
+              label={
+                isFavorite ? '♡ Remove from Favorites' : '♡ Add to Favorites'
               }
+              onPress={onToggleFavorite}
             />
+            <View className="w-3" />
+            <ActionChip label="⚠ Report issue" onPress={onReportIssue} />
           </View>
         </>
       )}

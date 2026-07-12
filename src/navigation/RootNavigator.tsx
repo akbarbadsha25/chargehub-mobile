@@ -9,7 +9,13 @@ import { HomeScreen } from '@/screens/HomeScreen';
 import type { Charger } from '@/services/chargers';
 
 export type MainTabParamList = {
-  Diagnostics: undefined;
+  Diagnostics:
+    | {
+        initialFeedbackMessage?: string;
+        initialFeedbackType?: 'wrong_charger_info';
+        reportRequestId?: string;
+      }
+    | undefined;
   Favorites: undefined;
   Home:
     | {
