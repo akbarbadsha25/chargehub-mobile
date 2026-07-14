@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { MapPin } from 'lucide-react-native';
 import {
   Alert,
   Animated,
@@ -7,6 +8,7 @@ import {
   NativeSyntheticEvent,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   useWindowDimensions,
   View
@@ -25,20 +27,23 @@ type ChargerBottomSheetProps = {
 };
 
 type DetailRowProps = {
-  icon: string;
   value: string;
 };
 
-function DetailRow({ icon, value }: DetailRowProps) {
+function DetailRow({ value }: DetailRowProps) {
   return (
     <View className="mt-4 flex-row items-start">
-      <Text className="mr-3 mt-0.5 text-base text-neutral-500">{icon}</Text>
-      <Text
-        className="flex-1 text-sm leading-5 text-neutral-600"
-        numberOfLines={3}
-      >
-        {value}
-      </Text>
+      <View style={styles.metadataIconColumn}>
+        <MapPin color="#737373" size={19} style={styles.addressIcon} />
+      </View>
+      <View className="flex-1">
+        <Text
+          className="text-[15px] leading-5 text-neutral-600"
+          numberOfLines={3}
+        >
+          {value}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -150,18 +155,23 @@ function MetadataRow({ charger }: { charger: Charger }) {
       : 'Distance unavailable';
 
   return (
-    <View className="mt-2 flex-row items-center">
-      <View
-        className={`mr-2 h-2.5 w-2.5 rounded-full ${getStatusDotClass(
-          charger.status
-        )}`}
-      />
-      <Text
-        className="flex-shrink text-[15px] leading-5 text-neutral-600"
-        numberOfLines={1}
-      >
-        {getStatusLabel(charger.status)} · {distanceText}
-      </Text>
+    <View className="mt-2 flex-row items-start">
+      <View style={styles.metadataIconColumn}>
+        <View
+          className={`h-2.5 w-2.5 rounded-full ${getStatusDotClass(
+            charger.status
+          )}`}
+          style={styles.statusDot}
+        />
+      </View>
+      <View className="flex-1">
+        <Text
+          className="text-[15px] leading-5 text-neutral-600"
+          numberOfLines={1}
+        >
+          {getStatusLabel(charger.status)} · {distanceText}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -349,9 +359,7 @@ export function ChargerBottomSheet({
         <LoadingSkeleton />
       ) : (
         <>
-          {charger.address ? (
-            <DetailRow icon="📍" value={charger.address} />
-          ) : null}
+          {charger.address ? <DetailRow value={charger.address} /> : null}
 
           <View className="mt-4 h-px bg-neutral-100" />
 
@@ -384,3 +392,18 @@ export function ChargerBottomSheet({
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  addressIcon: {
+    marginTop: 1
+  },
+  metadataIconColumn: {
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    minWidth: 40,
+    width: 40
+  },
+  statusDot: {
+    marginTop: 5
+  }
+});
