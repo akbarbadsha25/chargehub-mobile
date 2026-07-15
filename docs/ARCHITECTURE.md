@@ -232,11 +232,57 @@ Examples:
 
 ---
 
+## feedback_reports
+
+Beta feedback submitted from the mobile app.
+
+- id
+- feedback_type
+- message
+- contact
+- charger_id
+- charger_name
+- latitude
+- longitude
+- platform
+- app_version
+- submission_status
+- created_at
+
+Security:
+
+- Row Level Security must be enabled.
+- Anonymous mobile users may insert feedback reports.
+- Anonymous mobile users must not read, update, or delete feedback reports.
+- The mobile app must use only the Supabase anonymous key.
+- The Supabase service-role key must never be shipped in the mobile app.
+
+The SQL contract is documented in `docs/sql/feedback_reports.sql`.
+
+---
+
 ## user_reports (Future)
 
 - station_id
 - report_type
 - created_at
+
+---
+
+# Beta Feedback Flow
+
+ChargeHub submits beta feedback to Supabase through the existing Supabase client.
+
+If Supabase is unavailable, the app preserves the report in local AsyncStorage with a pending status. Pending reports can be retried from the Diagnostics screen and are marked as sent locally after a successful Supabase insert.
+
+The feedback report payload includes optional charger context when launched from the charger sheet report action:
+
+- charger_id
+- charger_name
+- latitude
+- longitude
+
+Missing Supabase configuration must fail clearly in development while still preserving feedback locally.
 
 ---
 

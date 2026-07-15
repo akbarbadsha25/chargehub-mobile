@@ -63,7 +63,9 @@ export function DiagnosticsScreen({ route }: DiagnosticsScreenProps) {
     errorMessage,
     feedback,
     isLoading,
-    isSubmitting
+    isRetrying,
+    isSubmitting,
+    retryPending
   } = useFeedback();
   const diagnostics = useChargeHubDiagnosticsStore();
   const [deviceLocation, setDeviceLocation] = useState<CurrentLocation | null>(
@@ -124,6 +126,9 @@ export function DiagnosticsScreen({ route }: DiagnosticsScreenProps) {
       ? devicePermissionStatus
       : diagnostics.permissionStatus;
   const lastKnownLocation = diagnostics.lastKnownLocation ?? deviceLocation;
+  const pendingFeedbackCount = feedback.filter(
+    (item) => item.submissionStatus === 'pending'
+  ).length;
   const handleClearFeedback = () => {
     Alert.alert(
       'Clear feedback?',
@@ -188,6 +193,12 @@ export function DiagnosticsScreen({ route }: DiagnosticsScreenProps) {
           isSubmitting={isSubmitting}
           onSubmit={addFeedback}
           prefillRequestId={route.params?.reportRequestId}
+          reportContext={{
+            chargerId: route.params?.reportChargerId,
+            chargerName: route.params?.reportChargerName,
+            latitude: route.params?.reportChargerLatitude,
+            longitude: route.params?.reportChargerLongitude
+          }}
         />
       </View>
 
@@ -197,16 +208,31 @@ export function DiagnosticsScreen({ route }: DiagnosticsScreenProps) {
             Submitted feedback
           </Text>
           {feedback.length > 0 ? (
-            <Pressable
-              accessibilityLabel="Clear all submitted feedback"
-              accessibilityRole="button"
-              className="h-11 justify-center rounded-full bg-neutral-100 px-4"
-              onPress={handleClearFeedback}
-            >
-              <Text className="text-sm font-semibold text-neutral-800">
-                Clear
-              </Text>
-            </Pressable>
+            <View className="flex-row">
+              {pendingFeedbackCount > 0 ? (
+                <Pressable
+                  accessibilityLabel="Retry pending feedback"
+                  accessibilityRole="button"
+                  className="mr-2 h-11 justify-center rounded-full bg-neutral-950 px-4"
+                  disabled={isRetrying}
+                  onPress={() => void retryPending()}
+                >
+                  <Text className="text-sm font-semibold text-white">
+                    {isRetrying ? 'Retrying' : 'Retry'}
+                  </Text>
+                </Pressable>
+              ) : null}
+              <Pressable
+                accessibilityLabel="Clear all submitted feedback"
+                accessibilityRole="button"
+                className="h-11 justify-center rounded-full bg-neutral-100 px-4"
+                onPress={handleClearFeedback}
+              >
+                <Text className="text-sm font-semibold text-neutral-800">
+                  Clear
+                </Text>
+              </Pressable>
+            </View>
           ) : null}
         </View>
 
@@ -235,9 +261,23 @@ export function DiagnosticsScreen({ route }: DiagnosticsScreenProps) {
                 <Text className="text-sm font-semibold text-neutral-950">
                   {feedbackTypeLabels[item.type]}
                 </Text>
+                <Text
+                  className={`mt-1 text-xs font-semibold ${
+                    item.submissionStatus === 'sent'
+                      ? 'text-green-700'
+                      : 'text-orange-700'
+                  }`}
+                >
+                  {item.submissionStatus === 'sent' ? 'Sent' : 'Pending sync'}
+                </Text>
                 <Text className="mt-1 text-sm leading-5 text-neutral-700">
                   {item.message}
                 </Text>
+                {item.chargerName ? (
+                  <Text className="mt-1 text-xs text-neutral-500">
+                    Charger: {item.chargerName} ({item.chargerId})
+                  </Text>
+                ) : null}
                 {item.contact ? (
                   <Text className="mt-1 text-xs text-neutral-500">
                     Contact: {item.contact}

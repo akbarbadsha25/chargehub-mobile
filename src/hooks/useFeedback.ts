@@ -5,6 +5,7 @@ import {
   FeedbackItem,
   NewFeedback,
   getSubmittedFeedback,
+  retryPendingFeedback,
   submitFeedback,
   subscribeFeedback
 } from '@/services/feedback';
@@ -13,6 +14,7 @@ export function useFeedback() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRetrying, setIsRetrying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadFeedback = useCallback(async () => {
@@ -41,12 +43,31 @@ export function useFeedback() {
     setIsSubmitting(true);
 
     try {
-      await submitFeedback(newFeedback);
+      const result = await submitFeedback(newFeedback);
       setErrorMessage(null);
+
+      return result;
     } catch {
       setErrorMessage('Unable to save feedback.');
+      return { submissionStatus: 'pending' as const };
     } finally {
       setIsSubmitting(false);
+    }
+  }, []);
+
+  const retryPending = useCallback(async () => {
+    setIsRetrying(true);
+
+    try {
+      const syncedCount = await retryPendingFeedback();
+      setErrorMessage(null);
+
+      return syncedCount;
+    } catch {
+      setErrorMessage('Unable to retry pending feedback.');
+      return 0;
+    } finally {
+      setIsRetrying(false);
     }
   }, []);
 
@@ -65,7 +86,9 @@ export function useFeedback() {
     errorMessage,
     feedback,
     isLoading,
+    isRetrying,
     isSubmitting,
-    reload: loadFeedback
+    reload: loadFeedback,
+    retryPending
   };
 }

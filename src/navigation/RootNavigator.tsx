@@ -13,6 +13,10 @@ export type MainTabParamList = {
     | {
         initialFeedbackMessage?: string;
         initialFeedbackType?: 'wrong_charger_info';
+        reportChargerId?: string;
+        reportChargerLatitude?: number;
+        reportChargerLongitude?: number;
+        reportChargerName?: string;
         reportRequestId?: string;
       }
     | undefined;

@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { FeedbackType, NewFeedback } from '@/services/feedback';
+import {
+  FeedbackSubmissionResult,
+  FeedbackType,
+  NewFeedback
+} from '@/services/feedback';
 
 type FeedbackFormProps = {
   initialMessage?: string;
   initialType?: FeedbackType;
   isSubmitting: boolean;
-  onSubmit: (feedback: NewFeedback) => Promise<void>;
+  onSubmit: (feedback: NewFeedback) => Promise<FeedbackSubmissionResult>;
   prefillRequestId?: string;
+  reportContext?: Omit<NewFeedback, 'contact' | 'message' | 'type'>;
 };
 
 const feedbackTypeOptions: readonly {
@@ -34,7 +39,8 @@ export function FeedbackForm({
   initialType,
   isSubmitting,
   onSubmit,
-  prefillRequestId
+  prefillRequestId,
+  reportContext
 }: FeedbackFormProps) {
   const [contact, setContact] = useState('');
   const [message, setMessage] = useState(initialMessage ?? '');
@@ -65,13 +71,18 @@ export function FeedbackForm({
     }
 
     setValidationMessage(null);
-    await onSubmit({
+    const result = await onSubmit({
       contact,
       message: normalizedMessage,
-      type
+      type,
+      ...reportContext
     });
     setMessage('');
-    setSubmitMessage('Feedback saved. Thank you.');
+    setSubmitMessage(
+      result.submissionStatus === 'sent'
+        ? 'Feedback sent. Thank you.'
+        : 'Saved on this device. We’ll retry when you’re online.'
+    );
     setType('bug');
   };
 

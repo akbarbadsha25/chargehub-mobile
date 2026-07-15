@@ -99,6 +99,10 @@
 - [x] Diagnostics screen
 - [x] Local beta feedback form
 - [x] Submitted feedback persistence with AsyncStorage
+- [x] Supabase beta feedback submission
+- [x] Offline feedback fallback and retry
+- [x] Feedback report charger context
+- [x] Feedback report RLS SQL
 - [x] Diagnostics app and system info
 - [x] Beta UX polish pass
 - [x] Smooth marker and bottom sheet animations

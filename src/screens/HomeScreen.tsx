@@ -189,6 +189,10 @@ export function HomeScreen({ navigation, route }: HomeScreenProps) {
     navigation.navigate('Diagnostics', {
       initialFeedbackMessage: `Wrong charger info reported for ${charger.name} (ID: ${charger.id}).\n\n`,
       initialFeedbackType: 'wrong_charger_info',
+      reportChargerId: charger.id,
+      reportChargerLatitude: charger.latitude,
+      reportChargerLongitude: charger.longitude,
+      reportChargerName: charger.name,
       reportRequestId: `${charger.id}-${Date.now()}`
     });
   };
