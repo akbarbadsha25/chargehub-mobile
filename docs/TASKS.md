@@ -114,5 +114,14 @@
 
 ## Release
 
+- [x] EAS build profiles configured
+- [x] iOS bundle identifier configured
+- [x] Android package configured
+- [x] iOS location permission message configured
+- [x] Android location permissions confirmed
+- [x] Build documentation
+- [ ] Final app icon asset
+- [ ] Final Android adaptive icon asset
+- [ ] Final splash asset
 - [ ] Android Beta
 - [ ] TestFlight

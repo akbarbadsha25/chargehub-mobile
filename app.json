@@ -1,15 +1,28 @@
 {
   "expo": {
     "name": "ChargeHub",
-    "slug": "chargehub-mobile",
+    "slug": "chargehub",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "chargehub",
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "ChargeHub uses your location to show nearby EV charging stations."
+        }
+      ]
+    ],
     "ios": {
+      "bundleIdentifier": "com.akbarbadsha.chargehub",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "ChargeHub uses your location to show nearby EV charging stations."
+      },
       "supportsTablet": true
     },
     "android": {
+      "package": "com.akbarbadsha.chargehub",
       "predictiveBackGestureEnabled": false
     }
   }
