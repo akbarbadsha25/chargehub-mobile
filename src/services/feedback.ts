@@ -133,7 +133,7 @@ function getSupabaseConfigError() {
     return null;
   }
 
-  return 'Supabase feedback submission is not configured. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY.';
+  return 'Supabase feedback submission is not configured. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.';
 }
 
 async function sendFeedbackReport(feedback: FeedbackItem) {
